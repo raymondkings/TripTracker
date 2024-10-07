@@ -39,7 +39,7 @@ TODO: Document the requirements you fulfilled with your app. Discuss them with y
 
 ## Analysis
 
-TODO: Include an analysis object model. You can use [draw.io](https://draw.io) or [apollon](https://apollon.ase.cit.tum.de) to create it. Please add all models as an Image - not as a link!
+![UML-Diagram](./UML-Diagram.png)
 
 ## System Design
 

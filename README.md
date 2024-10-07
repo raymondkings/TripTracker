@@ -1,4 +1,4 @@
-# Intro Course Project App of <yourname> for the iPraktikum
+# Intro Course Project App of Raymond King Setia for the iPraktikum
 
 To pass the intro course, you need to create your own unique iOS app (based on SwiftUI).
 

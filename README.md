@@ -43,7 +43,6 @@ TODO: Include a system design overview describing your application.
 
 ## Product Backlog
 
-## Backlog
 
 | ID  | Feature                              | Description                                                                  | Status  |
 | --- | ------------------------------------ | ---------------------------------------------------------------------------  | ------- |

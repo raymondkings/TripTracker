@@ -31,7 +31,7 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 
 - User can create, edit, delete, and view a trip
 - User can create, edit, delete, and view an activity
-- Activities can be sorted by date, and filtered by name
+- Activities can be filtered by name
 
 ## Analysis
 
@@ -43,4 +43,14 @@ TODO: Include a system design overview describing your application.
 
 ## Product Backlog
 
-TODO: Add a product backlog and don't forget to update it with each MR.
+A-1. Create new trip
+A-2. Edit trip details
+A-3. Delete trip
+A-4. View trip details
+A-5. Create new activity
+A-6. Edit activity details
+A-7. Delete activity
+A-8. Filter activity by date
+A-9. View activity details
+A-10. Show direction from current location to activity location
+

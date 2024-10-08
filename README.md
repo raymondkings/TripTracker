@@ -29,13 +29,9 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 
 ## Requirements
 
-TODO: Document the requirements you fulfilled with your app. Discuss them with your tutor.
 - User can create, edit, delete, and view a trip
 - User can create, edit, delete, and view an activity
-- User can specify an activity (title, description, date, time, location, ticket information)
 - Activities can be sorted by date, and filtered by name
-- User can generate an automated travel plan according to the timeframe and location (country / city)
-
 
 ## Analysis
 

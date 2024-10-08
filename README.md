@@ -45,16 +45,16 @@ TODO: Include a system design overview describing your application.
 
 ## Backlog
 
-| ID  | Feature                              | Description                                                                 | Priority | Status  |
-| --- | ------------------------------------ | --------------------------------------------------------------------------- | -------- | ------- |
-| A-1 | Create new trip                      | Allow users to create a new trip with relevant details like name and dates.  | High     | Pending |
-| A-2 | Edit trip details                    | Allow users to edit trip details such as name, date, and description.        | High     | Pending |
-| A-3 | Delete trip                          | Allow users to delete an existing trip.                                      | Medium   | Pending |
-| A-4 | View trip details                    | Display all details of a specific trip.                                      | High     | Pending |
-| A-5 | Create new activity                  | Allow users to add new activities under a specific trip with date, time, etc.| High     | Pending |
-| A-6 | Edit activity details                | Allow users to edit details of an existing activity.                         | High     | Pending |
-| A-7 | Delete activity                      | Allow users to delete an activity from the trip.                             | Medium   | Pending |
-| A-8 | Filter activity by date              | Allow users to filter activities by date within a trip.                      | Medium   | Pending |
-| A-9 | View activity details                | Display all details of a specific activity.                                  | High     | Pending |
-| A-10| Show directions to activity location | Provide directions from the user's current location to the activity location.| Medium   | Pending |
+| ID  | Feature                              | Description                                                                  | Status  |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------  | ------- |
+| A-1 | Create new trip                      | Allow users to create a new trip with relevant details like name and dates.  | Pending |
+| A-2 | Edit trip details                    | Allow users to edit trip details such as name, date, and description.        | Pending |
+| A-3 | Delete trip                          | Allow users to delete an existing trip.                                      | Pending |
+| A-4 | View trip details                    | Display all details of a specific trip.                                      | Pending |
+| A-5 | Create new activity                  | Allow users to add new activities under a specific trip with date, time, etc.| Pending |
+| A-6 | Edit activity details                | Allow users to edit details of an existing activity.                         | Pending |
+| A-7 | Delete activity                      | Allow users to delete an activity from the trip.                             | Pending |
+| A-8 | Filter activity by date              | Allow users to filter activities by date within a trip.                      | Pending |
+| A-9 | View activity details                | Display all details of a specific activity.                                  | Pending |
+| A-10| Show directions to activity location | Provide directions from the user's current location to the activity location.| Pending |
 

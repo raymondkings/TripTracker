@@ -39,7 +39,9 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 
 ## System Design
 
+TODO: Include a system design overview describing your application.
 
 ## Product Backlog
 
+TODO: Add a product backlog and don't forget to update it with each MR.
 

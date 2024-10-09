@@ -39,7 +39,7 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 
 ## System Design
 
-![Design-System](./Subsystem_Decomposition.png)
+![Design-System](./Subsystem-Decomposition-new.png)
 
 ## Product Backlog
 

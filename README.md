@@ -25,15 +25,17 @@ Until the deadline all of your PRs **need to be merged** and your final app **ne
 
 ## Problem Statement (max. 500 words)
 
-TODO: Add your problem statement here. 
+Traveling can be an exciting yet overwhelming experience. Sometimes travelers lack the possibility to organize their vacation properly. Wouldn't it be nice if there was a dedicated app on your Iphone that lets you keep track of essential information such as landmarks, activities, dates, ticket purchases, and restaurant menus? Additionally, incorporating AI can significantly enhance the planning experience by generating personalized itineraries based on user preferences and estimating budgets.
 
 ## Requirements
 
-TODO: Document the requirements you fulfilled with your app. Discuss them with your tutor.
+- User can create, edit, delete, and view a trip
+- User can create, edit, delete, and view an activity
+- Activities can be filtered by name
 
 ## Analysis
 
-TODO: Include an analysis object model. You can use [draw.io](https://draw.io) or [apollon](https://apollon.ase.cit.tum.de) to create it. Please add all models as an Image - not as a link!
+![UML-Diagram](./UML-Diagram.png)
 
 ## System Design
 

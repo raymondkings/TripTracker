@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct CreateTrip: View {
+    @ObservedObject var viewModel: TripViewModel
+
     @State private var tripName: String = ""
     @State private var startDate = Date()
     @State private var endDate = Date()
@@ -15,8 +17,10 @@ struct CreateTrip: View {
     @State private var isShowingDropdown = false
     @State private var isTripNameValid: Bool = true
 
+    @Environment(\.presentationMode) var presentationMode
+
     var isFormValid: Bool {
-        !tripName.isEmpty
+        !tripName.isEmpty && isValidCountry
     }
 
     var countries: [String] {
@@ -44,9 +48,7 @@ struct CreateTrip: View {
                 Form {
                     Section(header: Text("Trip Name")) {
                         TextField("Enter trip name", text: $tripName)
-                            .onChange(of: tripName) {
-                                _, newValue in
-                                print("tripname: \(tripName)")
+                            .onChange(of: tripName) { _, newValue in
                                 isTripNameValid = !newValue.isEmpty
                             }
 
@@ -86,7 +88,6 @@ struct CreateTrip: View {
                             Text("\(searchText) is not a known country")
                                 .foregroundColor(.red)
                                 .font(.caption)
-                                .frame(height: 5)
                         }
                     }
                 }
@@ -94,12 +95,17 @@ struct CreateTrip: View {
             .navigationBarTitle("Create Trip", displayMode: .inline)
             .navigationBarItems(
                 leading: Button(action: {
-                    print("Back button tapped")
+                    presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Back")
                 },
                 trailing: Button(action: {
-                    print("Create button tapped", tripName, startDate, endDate, searchText, isShowingDropdown)
+                    if isFormValid {
+                        viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+                        presentationMode.wrappedValue.dismiss()
+                    } else {
+                        print("Form is not valid")
+                    }
                 }) {
                     Text("Create")
                 }
@@ -110,6 +116,6 @@ struct CreateTrip: View {
 
 struct CreateTrip_Previews: PreviewProvider {
     static var previews: some View {
-        CreateTrip()
+        CreateTrip(viewModel: TripViewModel())
     }
 }

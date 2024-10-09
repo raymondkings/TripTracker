@@ -13,6 +13,11 @@ struct CreateTrip: View {
     @State private var endDate = Date()
     @State private var searchText: String = ""
     @State private var isShowingDropdown = false
+    @State private var isTripNameValid: Bool = true
+
+    var isFormValid: Bool {
+        !tripName.isEmpty
+    }
 
     var countries: [String] {
         let locale = Locale.current
@@ -39,6 +44,17 @@ struct CreateTrip: View {
                 Form {
                     Section(header: Text("Trip Name")) {
                         TextField("Enter trip name", text: $tripName)
+                            .onChange(of: tripName) {
+                                _, newValue in
+                                print("tripname: \(tripName)")
+                                isTripNameValid = !newValue.isEmpty
+                            }
+
+                        if !isTripNameValid && tripName.isEmpty {
+                            Text("Trip name cannot be empty")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
                     }
 
                     Section(header: Text("Duration")) {

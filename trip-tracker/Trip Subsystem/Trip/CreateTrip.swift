@@ -119,7 +119,6 @@ struct CreateTrip: View {
 
     private func filterCountries(_ newValue: String) {
         isShowingDropdown = !newValue.isEmpty
-        // Logic for filtering countries if needed
     }
 
     private func handleEditingChanged(_ isEditing: Bool) {

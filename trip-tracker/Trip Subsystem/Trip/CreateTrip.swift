@@ -25,8 +25,8 @@ struct CreateTrip: View {
 
     var countries: [String] {
         let locale = Locale.current
-        return Locale.Region.isoRegions.compactMap
-            { region in locale.localizedString(forRegionCode: region.identifier) }
+        return Locale.Region.isoRegions.compactMap { region in locale.localizedString(forRegionCode: region.identifier)
+        }
             .sorted()
     }
 

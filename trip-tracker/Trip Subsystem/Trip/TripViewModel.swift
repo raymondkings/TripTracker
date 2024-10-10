@@ -14,7 +14,7 @@ class TripViewModel: ObservableObject {
         id: UUID(),
         name: "Summer Vacation in Italy",
         startDate: Date(),
-        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date())!,
+        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
         country: "Italy"
     )
 
@@ -57,6 +57,6 @@ class TripViewModel: ObservableObject {
     }
 
     private func getDocumentsDirectory() -> URL {
-        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: "/")
     }
 }

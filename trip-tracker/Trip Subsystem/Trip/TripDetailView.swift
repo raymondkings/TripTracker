@@ -35,7 +35,7 @@ struct TripDetailView: View {
         id: UUID(),
         name: "Winter Getaway to Switzerland",
         startDate: Date(),
-        endDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())!,
+        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
         country: "Switzerland"
     ))
 }

@@ -44,8 +44,8 @@ let dateFormatter: DateFormatter = {
     TripCardView(trip: Trip(
         id: UUID(),
         name: "Summer Vacation in Italy",
-        startDate: Date(), // Current date
-        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date())!,
+        startDate: Date(),
+        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
         country: "Italy"
     ))
 }

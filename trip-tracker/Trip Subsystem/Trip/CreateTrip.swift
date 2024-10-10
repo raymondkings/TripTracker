@@ -25,9 +25,9 @@ struct CreateTrip: View {
 
     var countries: [String] {
         let locale = Locale.current
-        return Locale.Region.isoRegions.compactMap { region in
-            locale.localizedString(forRegionCode: region.identifier)
-        }.sorted()
+        return Locale.Region.isoRegions.compactMap
+            { region in locale.localizedString(forRegionCode: region.identifier) }
+            .sorted()
     }
 
     var filteredCountries: [String] {
@@ -46,50 +46,9 @@ struct CreateTrip: View {
         NavigationView {
             VStack {
                 Form {
-                    Section(header: Text("Trip Name")) {
-                        TextField("Enter trip name", text: $tripName)
-                            .onChange(of: tripName) { _, newValue in
-                                isTripNameValid = !newValue.isEmpty
-                            }
-
-                        if !isTripNameValid && tripName.isEmpty {
-                            Text("Trip name cannot be empty")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                        }
-                    }
-
-                    Section(header: Text("Duration")) {
-                        DatePicker("Start Date", selection: $startDate, in: Date()..., displayedComponents: .date)
-                        DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
-                    }
-
-                    Section(header: Text("Country")) {
-                        TextField("Search country", text: $searchText, onEditingChanged: { isEditing in
-                            isShowingDropdown = isEditing && !searchText.isEmpty
-                        })
-                        .onChange(of: searchText) { _, newValue in
-                            isShowingDropdown = !newValue.isEmpty
-                        }
-
-                        if isShowingDropdown && !filteredCountries.isEmpty {
-                            List(filteredCountries.prefix(10), id: \.self) { country in
-                                Button(action: {
-                                    searchText = country
-                                    isShowingDropdown = false
-                                }) {
-                                    Text(country)
-                                }
-                            }
-                            .frame(height: 25)
-                        }
-
-                        if !isValidCountry && !searchText.isEmpty && filteredCountries.isEmpty {
-                            Text("\(searchText) is not a known country")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                        }
-                    }
+                    tripNameSection()
+                    durationSection()
+                    countrySection()
                 }
             }
             .navigationBarTitle("Create Trip", displayMode: .inline)
@@ -99,17 +58,85 @@ struct CreateTrip: View {
                 }) {
                     Text("Back")
                 },
-                trailing: Button(action: {
-                    if isFormValid {
-                        viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
-                        presentationMode.wrappedValue.dismiss()
-                    } else {
-                        print("Form is not valid")
-                    }
-                }) {
+                trailing: Button(action: createTrip) {
                     Text("Create")
                 }
             )
+        }
+    }
+
+    private func tripNameSection() -> some View {
+        Section(header: Text("Trip Name")) {
+            TextField("Enter trip name", text: $tripName)
+                .onChange(of: tripName) { _, newValue in
+                    isTripNameValid = !newValue.isEmpty
+                }
+
+            if !isTripNameValid && tripName.isEmpty {
+                Text("Trip name cannot be empty")
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
+        }
+    }
+
+    private func durationSection() -> some View {
+        Section(header: Text("Duration")) {
+            DatePicker("Start Date", selection: $startDate, in: Date()..., displayedComponents: .date)
+            DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
+        }
+    }
+
+    private func countrySection() -> some View {
+        Section(header: Text("Country")) {
+            TextField("Search country", text: $searchText, onEditingChanged: handleEditingChanged)
+                .onChange(of: searchText) { _, newValue in
+                    isShowingDropdown = !newValue.isEmpty
+                }
+
+            if isShowingDropdown && !filteredCountries.isEmpty {
+                List(filteredCountries.prefix(10), id: \.self) { country in
+                    Button(action: {
+                        selectCountry(country)
+                    }) {
+                        Text(country)
+                    }
+                }
+                .frame(height: 25)
+            }
+
+            if !isValidCountry && !searchText.isEmpty && filteredCountries.isEmpty {
+                Text("\(searchText) is not a known country")
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
+        }
+    }
+
+    private func validateTripName(_ newValue: String) {
+        isTripNameValid = !newValue.isEmpty
+    }
+
+    private func filterCountries(_ newValue: String) {
+        isShowingDropdown = !newValue.isEmpty
+        // Logic for filtering countries if needed
+    }
+
+    private func handleEditingChanged(_ isEditing: Bool) {
+        isShowingDropdown = isEditing && !searchText.isEmpty
+    }
+
+    private func selectCountry(_ country: String) {
+        searchText = country
+        isShowingDropdown = false
+    }
+
+    private func createTrip() {
+        if isFormValid {
+            viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+            presentationMode.wrappedValue.dismiss()
+        } else {
+            print("Form is not valid")
         }
     }
 }

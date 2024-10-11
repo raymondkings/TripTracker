@@ -57,6 +57,7 @@ struct CreateTrip: View {
                 trailing: Button(action: createTrip) {
                     Text("Create")
                 }
+                .disabled(!isFormValid)
             )
         }
     }
@@ -130,8 +131,6 @@ struct CreateTrip: View {
         if isFormValid {
             viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
             presentationMode.wrappedValue.dismiss()
-        } else {
-            print("Form is not valid")
         }
     }
 }

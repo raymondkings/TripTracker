@@ -16,6 +16,7 @@ struct CreateTrip: View {
     @State private var searchText: String = ""
     @State private var isShowingDropdown = false
     @State private var isTripNameValid: Bool = true
+    @State private var isLoading = false
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -46,6 +47,9 @@ struct CreateTrip: View {
                     durationSection()
                     countrySection()
                 }
+                if isLoading {
+                    ProgressView("Creating trip...")
+                }
             }
             .navigationBarTitle("Create Trip", displayMode: .inline)
             .navigationBarItems(
@@ -57,7 +61,7 @@ struct CreateTrip: View {
                 trailing: Button(action: createTrip) {
                     Text("Create")
                 }
-                .disabled(!isFormValid)
+                .disabled(!isFormValid || isLoading)
             )
         }
     }
@@ -128,8 +132,16 @@ struct CreateTrip: View {
     }
 
     private func createTrip() {
-        if isFormValid {
-            viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+        isLoading = true
+        let imageViewModel = ImageViewModel()
+        imageViewModel.searchSinglePhoto(forCountry: searchText) { imageUrl in
+            guard let imageUrl = imageUrl else {
+                isLoading = false
+                return
+            }
+            viewModel.addTrip(name: tripName, country: searchText, startDate: startDate,
+                              endDate: endDate, imageUrl: imageUrl)
+            isLoading = false
             presentationMode.wrappedValue.dismiss()
         }
     }

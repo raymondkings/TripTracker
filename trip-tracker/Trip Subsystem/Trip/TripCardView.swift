@@ -9,8 +9,66 @@ import SwiftUI
 
 struct TripCardView: View {
     var trip: Trip
+    var imageUrl: URL?
 
     var body: some View {
+        ZStack(alignment: .leading) {
+            imageGroup
+            textGroup
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .cornerRadius(25)
+        .shadow(radius: 5)
+    }
+
+    var imageGroup: some View {
+        // Image Section
+        if let imageUrl = imageUrl {
+            return AnyView(
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .cornerRadius(10)
+                        .overlay(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.black.opacity(0.6), .clear]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .cornerRadius(10)
+                        )
+                } placeholder: {
+                    Color.gray
+                        .frame(height: 200)
+                        .cornerRadius(10)
+                }
+            )
+        } else {
+            return AnyView(
+                Image("Rome")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 200)
+                    .cornerRadius(10)
+                    .overlay(
+                        LinearGradient(
+                            gradient: Gradient(colors: [.black.opacity(0.6), .clear]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .cornerRadius(10)
+                        .frame(height: 200)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            )
+        }
+    }
+
+    var textGroup: some View {
+        // Text Section
         VStack(alignment: .leading, spacing: 10) {
             Text(trip.name)
                 .font(.headline)
@@ -25,12 +83,7 @@ struct TripCardView: View {
                 .font(.caption)
                 .foregroundColor(.white)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.blue)
-        .cornerRadius(25)
-        .shadow(radius: 5)
-        .padding(.horizontal, 16)
+        .padding(.leading, 16)
     }
 }
 

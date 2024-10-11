@@ -9,6 +9,7 @@ import SwiftUI
 struct TripListView: View {
     @Bindable var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
+    @State private var imageViewModel = ImageViewModel()
 
     var body: some View {
         NavigationView {
@@ -16,7 +17,7 @@ struct TripListView: View {
                 VStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
                         NavigationLink(destination: TripDetailView(trip: trip)) {
-                            TripCardView(trip: trip)
+                            TripCardView(trip: trip, imageUrl: trip.imageUrl)
                         }
                     }
                 }

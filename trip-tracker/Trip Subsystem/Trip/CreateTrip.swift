@@ -136,8 +136,6 @@ struct CreateTrip: View {
     }
 }
 
-struct CreateTrip_Previews: PreviewProvider {
-    static var previews: some View {
-        CreateTrip(viewModel: TripViewModel())
-    }
+#Preview {
+    CreateTrip(viewModel: TripViewModel())
 }

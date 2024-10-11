@@ -87,7 +87,7 @@ struct CreateTrip: View {
         Section(header: Text("Country")) {
             TextField("Search country", text: $searchText, onEditingChanged: handleEditingChanged)
                 .onChange(of: searchText) { _, newValue in
-                    isShowingDropdown = !newValue.isEmpty
+                    isShowingDropdown = !newValue.isEmpty && !countries.contains(newValue)
                 }
 
             if isShowingDropdown && !filteredCountries.isEmpty {

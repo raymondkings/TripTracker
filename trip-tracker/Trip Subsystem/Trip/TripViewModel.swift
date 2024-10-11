@@ -34,4 +34,13 @@ import Foundation
             trips[index] = updatedTrip
         }
     }
+
+    func deleteTrip(_ trip: Trip) {
+        if let index = trips.firstIndex(where: { $0.id == trip.id }) {
+            trips.remove(at: index)
+            print("Deleted trip: \(trip.name)")
+        } else {
+            print("Trip not found")
+        }
+    }
 }

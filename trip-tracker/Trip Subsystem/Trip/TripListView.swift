@@ -16,7 +16,9 @@ struct TripListView: View {
                 VStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
                         NavigationLink(destination: TripDetailView(trip: trip, tripViewModel: viewModel)) {
-                            TripCardView(trip: trip)
+                            TripCardView(trip: trip) {
+                                viewModel.deleteTrip(trip)
+                            }
                         }
                     }
                 }
@@ -35,6 +37,10 @@ struct TripListView: View {
             }
         }
     }
+}
+
+#Preview {
+    TripListView()
 }
 
 #Preview {

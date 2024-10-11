@@ -9,9 +9,14 @@ import SwiftUI
 
 struct TripDetailView: View {
     var trip: Trip
+    @Bindable var tripViewModel: TripViewModel
+    @State private var isShowingEditTrip = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            Text(trip.id.uuidString)
+                .font(.body)
+
             Text(trip.name)
                 .font(.body)
 
@@ -27,15 +32,22 @@ struct TripDetailView: View {
             Spacer()
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(trip.name)
+                    .font(.body)
+                    .lineLimit(1)
+            }
+        }
+        .navigationBarItems(
+            trailing: Button(action: {
+                isShowingEditTrip.toggle()
+            }) {
+                Image(systemName: "pencil")
+            }
+        )
+        .sheet(isPresented: $isShowingEditTrip) {
+            CreateEditTrip(viewModel: tripViewModel, tripToEdit: trip)
+        }
     }
-}
-
-#Preview {
-    TripDetailView(trip: Trip(
-        id: UUID(),
-        name: "Winter Getaway to Switzerland",
-        startDate: Date(),
-        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
-        country: "Switzerland"
-    ))
 }

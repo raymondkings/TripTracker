@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CreateTrip: View {
+struct CreateEditTrip: View {
     @Bindable var viewModel: TripViewModel
 
     @State private var tripName: String = ""
@@ -18,6 +18,13 @@ struct CreateTrip: View {
     @State private var isTripNameValid: Bool = true
 
     @Environment(\.presentationMode) var presentationMode
+
+    var tripToEdit: Trip?
+
+    // Check if we're editing an existing trip
+    private var isEditing: Bool {
+        return tripToEdit != nil
+    }
 
     var isFormValid: Bool {
         !tripName.isEmpty && isValidCountry
@@ -47,18 +54,23 @@ struct CreateTrip: View {
                     countrySection()
                 }
             }
-            .navigationBarTitle("Create Trip", displayMode: .inline)
+            .navigationBarTitle(isEditing ? "Edit Trip" : "Create Trip", displayMode: .inline)
             .navigationBarItems(
                 leading: Button(action: {
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Back")
                 },
-                trailing: Button(action: createTrip) {
-                    Text("Create")
+                trailing: Button(action: saveTrip) {
+                    Text(isEditing ? "Save" : "Create")
                 }
                 .disabled(!isFormValid)
             )
+        }
+        .onAppear {
+            if let trip = tripToEdit {
+                loadTripData(trip)
+            }
         }
     }
 
@@ -110,14 +122,6 @@ struct CreateTrip: View {
         }
     }
 
-    private func validateTripName(_ newValue: String) {
-        isTripNameValid = !newValue.isEmpty
-    }
-
-    private func filterCountries(_ newValue: String) {
-        isShowingDropdown = !newValue.isEmpty
-    }
-
     private func handleEditingChanged(_ isEditing: Bool) {
         isShowingDropdown = isEditing && !searchText.isEmpty
     }
@@ -127,14 +131,32 @@ struct CreateTrip: View {
         isShowingDropdown = false
     }
 
-    private func createTrip() {
+    private func saveTrip() {
         if isFormValid {
-            viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+            if let tripToEdit = tripToEdit {
+                let updatedTrip = Trip(
+                    id: tripToEdit.id,
+                    name: tripName,
+                    startDate: startDate,
+                    endDate: endDate,
+                    country: searchText
+                )
+                viewModel.editTrip(updatedTrip)
+            } else {
+                viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+            }
             presentationMode.wrappedValue.dismiss()
         }
+    }
+
+    private func loadTripData(_ trip: Trip) {
+        tripName = trip.name
+        searchText = trip.country
+        startDate = trip.startDate
+        endDate = trip.endDate
     }
 }
 
 #Preview {
-    CreateTrip(viewModel: TripViewModel())
+    CreateEditTrip(viewModel: TripViewModel())
 }

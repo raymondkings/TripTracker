@@ -45,7 +45,7 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 
 | ID  | Feature                              | Description                                                                 | Priority | Status  |
 | --- | ------------------------------------ | --------------------------------------------------------------------------- | -------- | ------- |
-| A-1 | Create new trip                      | Allow users to create a new trip with relevant details like name and dates.  | Major   | Pending |
+| A-1 | Create new trip                      | Allow users to create a new trip with relevant details like name and dates.  | Major   | Done |
 | A-2 | Edit trip details                    | Allow users to edit trip details such as name, date, and description.        | Major   | Pending |
 | A-3 | Delete trip                          | Allow users to delete an existing trip.                                      | Minor   | Pending |
 | A-4 | View trip details                    | Display all details of a specific trip.                                      | Major   | Pending |

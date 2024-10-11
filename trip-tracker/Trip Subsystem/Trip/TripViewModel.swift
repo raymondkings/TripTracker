@@ -7,8 +7,8 @@
 
 import Foundation
 
-class TripViewModel: ObservableObject {
-    @Published var trips: [Trip] = []
+@Observable class TripViewModel {
+    var trips: [Trip] = []
 
     let mockTrip = Trip(
         id: UUID(),

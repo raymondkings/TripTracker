@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TripListView: View {
-    @ObservedObject var viewModel = TripViewModel()
+    @Bindable var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
 
     var body: some View {
@@ -48,7 +48,6 @@ struct TripListView: View {
             }
         }
     }
-    
 }
 
 #Preview {

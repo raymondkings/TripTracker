@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CreateTrip: View {
-    @ObservedObject var viewModel: TripViewModel
+    @Bindable var viewModel: TripViewModel
 
     @State private var tripName: String = ""
     @State private var startDate = Date()

@@ -27,15 +27,11 @@ struct CreateTrip: View {
         let locale = Locale.current
         return Locale.Region.isoRegions.compactMap { region in locale.localizedString(forRegionCode: region.identifier)
         }
-            .sorted()
+        .sorted()
     }
 
     var filteredCountries: [String] {
-        if searchText.isEmpty {
-            return countries
-        } else {
-            return countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
-        }
+        return countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
 
     var isValidCountry: Bool {

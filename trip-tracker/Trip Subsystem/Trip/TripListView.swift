@@ -18,20 +18,37 @@ struct TripListView: View {
                         NavigationLink(destination: TripDetailView(trip: trip)) {
                             TripCardView(trip: trip)
                         }
+                        .swipeActions(edge: .trailing) {
+                            Button {
+                                print("deleting trip")
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+
+                            Button {
+                                print("editing trip")
+                            } label: {
+                                Label("edit", systemImage: "pencil")
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle("Trips")
-            .navigationBarItems(trailing: Button(action: {
-                isShowingCreateTrip.toggle()
-            }) {
-                Text("Add Trip")
-            })
+            .navigationBarItems(
+                trailing: Button(action: {
+                    isShowingCreateTrip.toggle()
+                }) {
+                    Image(systemName: "plus")
+                }
+            )
+
             .sheet(isPresented: $isShowingCreateTrip) {
                 CreateTrip(viewModel: viewModel)
             }
         }
     }
+    
 }
 
 #Preview {

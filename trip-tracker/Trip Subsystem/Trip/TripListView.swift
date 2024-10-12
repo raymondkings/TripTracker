@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TripListView: View {
-    @Bindable var viewModel = TripViewModel()
+    @State var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
 
     var body: some View {
@@ -15,9 +15,9 @@ struct TripListView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
-                        NavigationLink(destination: TripDetailView(trip: trip, tripViewModel: viewModel)) {
+                        NavigationLink(destination: ActivityListView(activities: trip.activities ?? [])) {
                             TripCardView(trip: trip) {
-                                viewModel.deleteTrip(trip)
+                                viewModel.deleteTrip(trip) // Delete trip functionality
                             }
                         }
                     }
@@ -31,16 +31,11 @@ struct TripListView: View {
                     Image(systemName: "plus")
                 }
             )
-
             .sheet(isPresented: $isShowingCreateTrip) {
                 CreateEditTrip(viewModel: viewModel)
             }
         }
     }
-}
-
-#Preview {
-    TripListView()
 }
 
 #Preview {

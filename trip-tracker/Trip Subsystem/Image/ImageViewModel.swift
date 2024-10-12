@@ -11,44 +11,23 @@ import SwiftUI
     private let accessKey = "MnVxMNJF2r7WBgA7eDhJKkTFXe--PLpXh6lGUSDLgs0"
     var imageUrl: URL?
 
-    func searchSinglePhoto(forCountry country: String) {
+    func searchSinglePhoto(forCountry country: String) async {
         let query = "famous tourist attractions in \(country)"
         let urlString = "https://api.unsplash.com/photos/random?client_id=\(accessKey)&query=\(query)"
 
-        guard let url = URL(string: urlString) else {
-            imageUrl = nil
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: url) { data, _, error in
-            if let error = error {
-                print("Error fetching data: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.imageUrl = nil
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.imageUrl = nil
-                }
-                return
-            }
-
+        if let url = URL(string: urlString) {
             do {
+                let (data, _) = try await URLSession.shared.data(from: url)
                 let result = try JSONDecoder().decode(SearchResult.self, from: data)
                 DispatchQueue.main.async {
                     self.imageUrl = URL(string: result.urls.small)
                 }
             } catch {
-                print("Error decoding JSON")
                 DispatchQueue.main.async {
                     self.imageUrl = nil
                 }
             }
         }
-        task.resume()
     }
 
     private struct SearchResult: Codable {

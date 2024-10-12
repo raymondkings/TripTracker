@@ -55,7 +55,11 @@ struct CreateTrip: View {
                 }) {
                     Text("Back")
                 },
-                trailing: Button(action: createTrip) {
+                trailing: Button(action: {
+                    Task {
+                        await createTrip()
+                    }
+                }) {
                     Text("Create")
                 }
                 .disabled(!isFormValid || isLoading)
@@ -129,9 +133,9 @@ struct CreateTrip: View {
         isValidCountry = true
     }
 
-    private func createTrip() {
+    private func createTrip() async {
         isLoading = true
-        imageViewModel.searchSinglePhoto(forCountry: searchText)
+        await imageViewModel.searchSinglePhoto(forCountry: searchText)
 
         if let imageUrl = imageViewModel.imageUrl {
             viewModel.addTrip(

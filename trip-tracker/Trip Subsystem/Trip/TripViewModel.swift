@@ -15,17 +15,23 @@ import Foundation
         name: "Summer Vacation in Italy",
         startDate: Date(),
         endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
-        country: "Italy"
+        country: "Italy",
+        activities: []
     )
-
-    private let fileName = "trips.json"
 
     init() {
         trips.append(mockTrip)
     }
 
     func addTrip(name: String, country: String, startDate: Date, endDate: Date) {
-        let newTrip = Trip(id: UUID(), name: name, startDate: startDate, endDate: endDate, country: country)
+        let newTrip = Trip(
+            id: UUID(),
+            name: name,
+            startDate: startDate,
+            endDate: endDate,
+            country: country,
+            activities: []
+        )
         trips.append(newTrip)
     }
 
@@ -38,9 +44,25 @@ import Foundation
     func deleteTrip(_ trip: Trip) {
         if let index = trips.firstIndex(where: { $0.id == trip.id }) {
             trips.remove(at: index)
-            print("Deleted trip: \(trip.name)")
-        } else {
-            print("Trip not found")
+        }
+    }
+
+    func addActivity(to trip: Trip, activity: Activity) {
+        if let index = trips.firstIndex(where: { $0.id == trip.id }) {
+            trips[index].activities?.append(activity)
+        }
+    }
+
+    func deleteActivity(from trip: Trip, activity: Activity) {
+        if let index = trips.firstIndex(where: { $0.id == trip.id }) {
+            trips[index].activities?.removeAll { $0.id == activity.id }
+        }
+    }
+
+    func editActivity(from trip: Trip, activity: Activity) {
+        if let tripIndex = trips.firstIndex(where: { $0.id == trip.id }),
+           let activityIndex = trips[tripIndex].activities?.firstIndex(where: { $0.id == activity.id })
+        { trips[tripIndex].activities?[activityIndex] = activity
         }
     }
 }

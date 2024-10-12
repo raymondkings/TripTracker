@@ -16,3 +16,4 @@ struct ContentView: View {
 #Preview {
     TripListView()
 }
+

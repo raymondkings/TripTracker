@@ -16,6 +16,7 @@ struct CreateTrip: View {
     @State private var searchText: String = ""
     @State private var isShowingDropdown = false
     @State private var isTripNameValid: Bool = true
+    @State private var isValidCountry: Bool = true
     @State private var isLoading = false
 
     @Environment(\.presentationMode) var presentationMode
@@ -33,10 +34,6 @@ struct CreateTrip: View {
 
     var filteredCountries: [String] {
         return countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
-    }
-
-    var isValidCountry: Bool {
-        countries.contains(searchText)
     }
 
     var body: some View {
@@ -63,6 +60,9 @@ struct CreateTrip: View {
                 }
                 .disabled(!isFormValid || isLoading)
             )
+        }
+        .onChange(of: searchText) {
+            validateCountry(searchText)
         }
     }
 
@@ -106,7 +106,7 @@ struct CreateTrip: View {
                 .frame(height: 25)
             }
 
-            if !isValidCountry && !searchText.isEmpty && filteredCountries.isEmpty {
+            if !isValidCountry && !searchText.isEmpty {
                 Text("\(searchText) is not a known destination")
                     .foregroundColor(.red)
                     .font(.caption)
@@ -114,12 +114,9 @@ struct CreateTrip: View {
         }
     }
 
-    private func validateTripName(_ newValue: String) {
-        isTripNameValid = !newValue.isEmpty
-    }
-
-    private func filterCountries(_ newValue: String) {
-        isShowingDropdown = !newValue.isEmpty
+    private func validateCountry(_ newValue: String) {
+        isValidCountry = countries.contains(newValue)
+        isShowingDropdown = !newValue.isEmpty && !isValidCountry
     }
 
     private func handleEditingChanged(_ isEditing: Bool) {
@@ -129,6 +126,7 @@ struct CreateTrip: View {
     private func selectCountry(_ country: String) {
         searchText = country
         isShowingDropdown = false
+        isValidCountry = true
     }
 
     private func createTrip() {

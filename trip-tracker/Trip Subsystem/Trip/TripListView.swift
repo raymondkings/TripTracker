@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TripListView: View {
-    @Bindable var viewModel = TripViewModel()
+    @State var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
     @State private var imageViewModel = ImageViewModel()
 

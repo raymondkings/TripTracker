@@ -11,8 +11,6 @@ import Foundation
     var trips: [Trip] = []
     let mockImageUrlString = "https://api.unsplash.com/photos/random?client_id=nVxMNJF2r7WBgA7eDhJKkTFXe--PLpXh6lGUSDLgs0&query=famous tourist attractions in italy"
 
-    private let fileName = "trips.json"
-
     init() {
         let mockTrip = Trip(
             id: UUID(),

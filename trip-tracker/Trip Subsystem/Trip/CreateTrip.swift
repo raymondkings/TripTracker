@@ -89,8 +89,8 @@ struct CreateTrip: View {
     }
 
     private func countrySection() -> some View {
-        Section(header: Text("Country")) {
-            TextField("Search country", text: $searchText, onEditingChanged: handleEditingChanged)
+        Section(header: Text("Destination")) {
+            TextField("Search destination", text: $searchText, onEditingChanged: handleEditingChanged)
                 .onChange(of: searchText) { _, newValue in
                     isShowingDropdown = !newValue.isEmpty && !countries.contains(newValue)
                 }
@@ -107,7 +107,7 @@ struct CreateTrip: View {
             }
 
             if !isValidCountry && !searchText.isEmpty && filteredCountries.isEmpty {
-                Text("\(searchText) is not a known country")
+                Text("\(searchText) is not a known destination")
                     .foregroundColor(.red)
                     .font(.caption)
             }

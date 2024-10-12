@@ -25,9 +25,21 @@ import Foundation
         trips.append(mockTrip)
     }
 
-    func addTrip(name: String, country: String, startDate: Date, endDate: Date, imageUrl: URL?) {
-        let newTrip = Trip(id: UUID(), name: name, startDate: startDate,
-                           endDate: endDate, country: country, imageUrl: imageUrl)
+    func addTrip(
+        name: String,
+        country: String,
+        startDate: Date,
+        endDate: Date,
+        imageUrl: URL?
+    ) {
+        let newTrip = Trip(
+            id: UUID(),
+            name: name,
+            startDate: startDate,
+            endDate: endDate,
+            country: country,
+            imageUrl: imageUrl
+        )
         trips.append(newTrip)
     }
 }

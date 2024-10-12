@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CreateTrip: View {
     @Bindable var viewModel: TripViewModel
-
+    @Bindable var imageViewModel: ImageViewModel
     @State private var tripName: String = ""
     @State private var startDate = Date()
     @State private var endDate = Date()
@@ -133,20 +133,24 @@ struct CreateTrip: View {
 
     private func createTrip() {
         isLoading = true
-        let imageViewModel = ImageViewModel()
-        imageViewModel.searchSinglePhoto(forCountry: searchText) { imageUrl in
-            guard let imageUrl = imageUrl else {
-                isLoading = false
-                return
-            }
-            viewModel.addTrip(name: tripName, country: searchText, startDate: startDate,
-                              endDate: endDate, imageUrl: imageUrl)
-            isLoading = false
+        imageViewModel.searchSinglePhoto(forCountry: searchText)
+
+        if let imageUrl = imageViewModel.imageUrl {
+            viewModel.addTrip(
+                name: tripName,
+                country: searchText,
+                startDate: startDate,
+                endDate: endDate,
+                imageUrl: imageUrl
+            )
+
             presentationMode.wrappedValue.dismiss()
         }
+
+        isLoading = false
     }
 }
 
 #Preview {
-    CreateTrip(viewModel: TripViewModel())
+    CreateTrip(viewModel: TripViewModel(), imageViewModel: ImageViewModel())
 }

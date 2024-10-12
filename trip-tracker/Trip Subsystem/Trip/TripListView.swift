@@ -32,7 +32,7 @@ struct TripListView: View {
             )
 
             .sheet(isPresented: $isShowingCreateTrip) {
-                CreateTrip(viewModel: viewModel)
+                CreateTrip(viewModel: viewModel, imageViewModel: imageViewModel)
             }
         }
     }

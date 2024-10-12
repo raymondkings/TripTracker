@@ -4,37 +4,14 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
-
 import SwiftUI
 
 struct CreateTrip: View {
     @Bindable var viewModel: TripViewModel
     @Bindable var imageViewModel: ImageViewModel
-    @State private var tripName: String = ""
-    @State private var startDate = Date()
-    @State private var endDate = Date()
-    @State private var searchText: String = ""
-    @State private var isShowingDropdown = false
-    @State private var isTripNameValid: Bool = true
-    @State private var isValidCountry: Bool = true
-    @State private var isLoading = false
+    @Bindable var createTripViewModel = CreateTripViewModel()
 
     @Environment(\.presentationMode) var presentationMode
-
-    var isFormValid: Bool {
-        !tripName.isEmpty && isValidCountry
-    }
-
-    var countries: [String] {
-        let locale = Locale.current
-        return Locale.Region.isoRegions.compactMap { region in locale.localizedString(forRegionCode: region.identifier)
-        }
-        .sorted()
-    }
-
-    var filteredCountries: [String] {
-        return countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
-    }
 
     var body: some View {
         NavigationView {
@@ -44,7 +21,7 @@ struct CreateTrip: View {
                     durationSection()
                     countrySection()
                 }
-                if isLoading {
+                if createTripViewModel.isLoading {
                     ProgressView("Creating trip...")
                 }
             }
@@ -62,22 +39,22 @@ struct CreateTrip: View {
                 }) {
                     Text("Create")
                 }
-                .disabled(!isFormValid || isLoading)
+                .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
             )
         }
-        .onChange(of: searchText) {
-            validateCountry(searchText)
+        .onChange(of: createTripViewModel.searchText) {
+            createTripViewModel.validateCountry()
         }
     }
 
     private func tripNameSection() -> some View {
         Section(header: Text("Trip Name")) {
-            TextField("Enter trip name", text: $tripName)
-                .onChange(of: tripName) { _, newValue in
-                    isTripNameValid = !newValue.isEmpty
+            TextField("Enter trip name", text: $createTripViewModel.tripName)
+                .onChange(of: createTripViewModel.tripName) { _, newValue in
+                    createTripViewModel.isTripNameValid = !newValue.isEmpty
                 }
 
-            if !isTripNameValid && tripName.isEmpty {
+            if !createTripViewModel.isTripNameValid && createTripViewModel.tripName.isEmpty {
                 Text("Trip name cannot be empty")
                     .foregroundColor(.red)
                     .font(.caption)
@@ -87,22 +64,36 @@ struct CreateTrip: View {
 
     private func durationSection() -> some View {
         Section(header: Text("Duration")) {
-            DatePicker("Start Date", selection: $startDate, in: Date()..., displayedComponents: .date)
-            DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
+            DatePicker(
+                "Start Date",
+                selection: $createTripViewModel.startDate,
+                in: Date()...,
+                displayedComponents: .date
+            )
+            DatePicker(
+                "End Date",
+                selection: $createTripViewModel.endDate,
+                in: createTripViewModel.startDate...,
+                displayedComponents: .date
+            )
         }
     }
 
     private func countrySection() -> some View {
         Section(header: Text("Destination")) {
-            TextField("Search destination", text: $searchText, onEditingChanged: handleEditingChanged)
-                .onChange(of: searchText) { _, newValue in
-                    isShowingDropdown = !newValue.isEmpty && !countries.contains(newValue)
-                }
-
-            if isShowingDropdown && !filteredCountries.isEmpty {
-                List(filteredCountries.prefix(10), id: \.self) { country in
+            TextField(
+                "Search destination",
+                text: $createTripViewModel.searchText,
+                onEditingChanged: createTripViewModel.handleEditingChanged
+            )
+            .onChange(of: createTripViewModel.searchText) { _, newValue in
+                createTripViewModel.isShowingDropdown =
+                    !newValue.isEmpty && !createTripViewModel.countries.contains(newValue)
+            }
+            if createTripViewModel.isShowingDropdown && !createTripViewModel.filteredCountries.isEmpty {
+                List(createTripViewModel.filteredCountries.prefix(10), id: \.self) { country in
                     Button(action: {
-                        selectCountry(country)
+                        createTripViewModel.selectCountry(country)
                     }) {
                         Text(country)
                     }
@@ -110,49 +101,29 @@ struct CreateTrip: View {
                 .frame(height: 25)
             }
 
-            if !isValidCountry && !searchText.isEmpty {
-                Text("\(searchText) is not a known destination")
+            if !createTripViewModel.isValidCountry && !createTripViewModel.searchText.isEmpty {
+                Text("\(createTripViewModel.searchText) is not a known destination")
                     .foregroundColor(.red)
                     .font(.caption)
             }
         }
     }
 
-    private func validateCountry(_ newValue: String) {
-        isValidCountry = countries.contains(newValue)
-        isShowingDropdown = !newValue.isEmpty && !isValidCountry
-    }
-
-    private func handleEditingChanged(_ isEditing: Bool) {
-        isShowingDropdown = isEditing && !searchText.isEmpty
-    }
-
-    private func selectCountry(_ country: String) {
-        searchText = country
-        isShowingDropdown = false
-        isValidCountry = true
-    }
-
     private func createTrip() async {
-        isLoading = true
-        await imageViewModel.searchSinglePhoto(forCountry: searchText)
+        createTripViewModel.isLoading = true
+        await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
 
         if let imageUrl = imageViewModel.imageUrl {
             viewModel.addTrip(
-                name: tripName,
-                country: searchText,
-                startDate: startDate,
-                endDate: endDate,
+                name: createTripViewModel.tripName,
+                country: createTripViewModel.searchText,
+                startDate: createTripViewModel.startDate,
+                endDate: createTripViewModel.endDate,
                 imageUrl: imageUrl
             )
-
             presentationMode.wrappedValue.dismiss()
         }
 
-        isLoading = false
+        createTripViewModel.isLoading = false
     }
-}
-
-#Preview {
-    CreateTrip(viewModel: TripViewModel(), imageViewModel: ImageViewModel())
 }

@@ -21,7 +21,9 @@ struct TripListView: View {
                                                                    tripViewModel:
                                                         viewModel, imageViewModel:
                                                         imageViewModel)) {
-                            TripCardView(trip: trip, imageUrl: trip.imageUrl)
+                            TripCardView(trip: trip, imageUrl: trip.imageUrl) {
+                                viewModel.deleteTrip(trip)
+                            }
                         }
                     }
                 }.padding(16)

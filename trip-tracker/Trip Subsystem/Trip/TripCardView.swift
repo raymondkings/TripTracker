@@ -9,6 +9,7 @@ import SwiftUI
 struct TripCardView: View {
     var trip: Trip
     var imageUrl: URL?
+    let onDelete: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -18,6 +19,12 @@ struct TripCardView: View {
         .frame(width: UIScreen.main.bounds.width - 32, height: 250)
         .background(Color(UIColor.systemGray6))
         .cornerRadius(15)
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "Trash")
+            }
+        }
+        .padding(.horizontal)
     }
 
     var imageGroup: some View {
@@ -101,13 +108,3 @@ let dateFormatter: DateFormatter = {
     formatter.dateStyle = .medium
     return formatter
 }()
-
-#Preview {
-    TripCardView(trip: Trip(
-        id: UUID(),
-        name: "Summer Vacation in Italy",
-        startDate: Date(),
-        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
-        country: "Italy"
-    ))
-}

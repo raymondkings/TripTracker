@@ -11,6 +11,5 @@ public struct Activity: Identifiable, Codable, Equatable {
     public var name: String
     public var description: String
     public var date: Date
-    public var latitude: Double
-    public var longitude: Double
+    public var location: String
 }

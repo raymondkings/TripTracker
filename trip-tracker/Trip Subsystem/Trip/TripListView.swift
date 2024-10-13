@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TripListView: View {
-    var viewModel = TripViewModel()
+    @State var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
 
     var body: some View {

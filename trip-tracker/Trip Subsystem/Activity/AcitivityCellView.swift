@@ -4,7 +4,7 @@
 //
 //  Created by Raymond King on 12.10.24.
 //
-
+import MapKit
 import SwiftUI
 
 struct ActivityCellView: View {
@@ -29,12 +29,15 @@ struct ActivityCellView: View {
 
             HStack {
                 Image(systemName: "location")
-                Text("Lat: \(activity.latitude.formatted()), Lon: \(activity.longitude.formatted())")
+                Text(activity.location)
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
         }
         .padding()
+        .onTapGesture {
+            openInAppleMaps(with: activity.location)
+        }
     }
 
     let dateFormatter: DateFormatter = {
@@ -42,16 +45,23 @@ struct ActivityCellView: View {
         formatter.dateStyle = .medium
         return formatter
     }()
+
+    private func openInAppleMaps(with searchText: String) {
+        let escapedQuery = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "http://maps.apple.com/?q=\(escapedQuery)"
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
 }
 
 #Preview {
     let newActivity = Activity(
         id: UUID(),
         name: "Test Activity",
-        description: "This is just a mocked activity",
+        description: "This is a very fun activity!",
         date: Date(),
-        latitude: 10.0,
-        longitude: 11.0
+        location: "Vatican Museum"
     )
     ActivityCellView(activity: newActivity)
 }

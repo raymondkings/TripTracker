@@ -15,22 +15,20 @@ import Foundation
         name: "Visit the Vatican Museum!",
         description: "blablablablablablablablablablablablablablablablablablablablabla",
         date: Date(),
-        latitude: 41.902916,
-        longitude: 12.453389
+        location: "Vatican Museum"
     )
 
     init() {
         activities.append(mockActivity)
     }
 
-    func addActivity(name: String, description: String, date: Date, latitude: Double, longitude: Double) {
+    func addActivity(name: String, description: String, date: Date, location : String) {
         let newActivity = Activity(
             id: UUID(),
             name: name,
             description: description,
             date: date,
-            latitude: latitude,
-            longitude: longitude
+            location: location
         )
         activities.append(newActivity)
     }

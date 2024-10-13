@@ -16,11 +16,13 @@ struct TripListView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
-                        NavigationLink(destination:
-                                        TripDetailView(trip: trip,
-                                                                   tripViewModel:
-                                                        viewModel, imageViewModel:
-                                                        imageViewModel)) {
+                        NavigationLink(
+                            destination: TripDetailView(
+                                trip: trip,
+                                tripViewModel: viewModel,
+                                imageViewModel: imageViewModel
+                            )
+                        ) {
                             TripCardView(trip: trip, imageUrl: trip.imageUrl) {
                                 viewModel.deleteTrip(trip)
                             }

@@ -20,7 +20,7 @@ struct TripListView: View {
                             TripCardView(trip: trip, imageUrl: trip.imageUrl)
                         }
                     }
-                }
+                }.padding(16)
             }
             .navigationTitle("Trips")
             .navigationBarItems(

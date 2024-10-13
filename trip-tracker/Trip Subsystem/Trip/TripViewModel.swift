@@ -40,4 +40,10 @@ import Foundation
         )
         trips.append(newTrip)
     }
+
+    func editTrip(_ updatedTrip: Trip) {
+        if let index = trips.firstIndex(where: { $0.id == updatedTrip.id }) {
+            trips[index] = updatedTrip
+        }
+    }
 }

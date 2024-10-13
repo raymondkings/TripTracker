@@ -6,12 +6,18 @@
 //
 import SwiftUI
 
-struct CreateTrip: View {
+struct CreateEditTrip: View {
     @Bindable var viewModel: TripViewModel
     @Bindable var imageViewModel: ImageViewModel
     @Bindable var createTripViewModel = CreateTripViewModel()
 
     @Environment(\.presentationMode) var presentationMode
+
+    var tripToEdit: Trip?
+
+    private var isEditing: Bool {
+        return tripToEdit != nil
+    }
 
     var body: some View {
         NavigationView {
@@ -25,7 +31,7 @@ struct CreateTrip: View {
                     ProgressView("Creating trip...")
                 }
             }
-            .navigationBarTitle("Create Trip", displayMode: .inline)
+            .navigationBarTitle(isEditing ? "Edit Trip" : "Create Trip", displayMode: .inline)
             .navigationBarItems(
                 leading: Button(action: {
                     presentationMode.wrappedValue.dismiss()
@@ -34,16 +40,21 @@ struct CreateTrip: View {
                 },
                 trailing: Button(action: {
                     Task {
-                        await createTrip()
+                        await saveTrip()
                     }
                 }) {
-                    Text("Create")
+                    Text(isEditing ? "Save" : "Create")
                 }
                 .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
             )
         }
         .onChange(of: createTripViewModel.searchText) {
             createTripViewModel.validateCountry()
+        }
+        .onAppear {
+            if let trip = tripToEdit {
+                loadTripData(trip)
+            }
         }
     }
 
@@ -109,21 +120,43 @@ struct CreateTrip: View {
         }
     }
 
-    private func createTrip() async {
-        createTripViewModel.isLoading = true
-        await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
-
-        if let imageUrl = imageViewModel.imageUrl {
-            viewModel.addTrip(
+    private func saveTrip() async {
+        if let tripToEdit = tripToEdit {
+            let updatedTrip = Trip(
+                id: tripToEdit.id,
                 name: createTripViewModel.tripName,
-                country: createTripViewModel.searchText,
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,
-                imageUrl: imageUrl
+                country: createTripViewModel.searchText,
+                imageUrl: imageViewModel.imageUrl ?? tripToEdit.imageUrl
             )
+            viewModel.editTrip(updatedTrip)
             presentationMode.wrappedValue.dismiss()
-        }
+        } else {
+            createTripViewModel.isLoading = true
+            await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
 
-        createTripViewModel.isLoading = false
+            if let imageUrl = imageViewModel.imageUrl {
+                viewModel.addTrip(
+                    name: createTripViewModel.tripName,
+                    country: createTripViewModel.searchText,
+                    startDate: createTripViewModel.startDate,
+                    endDate: createTripViewModel.endDate,
+                    imageUrl: imageUrl
+                )
+                presentationMode.wrappedValue.dismiss()
+            }
+            createTripViewModel.isLoading = false
+        }
+    }
+
+    private func loadTripData(_ trip: Trip) {
+        createTripViewModel.tripName = trip.name
+        createTripViewModel.searchText = trip.country
+        createTripViewModel.startDate = trip.startDate
+        createTripViewModel.endDate = trip.endDate
+        if let imageUrl = trip.imageUrl {
+            imageViewModel.imageUrl = imageUrl
+        }
     }
 }

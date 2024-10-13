@@ -16,7 +16,11 @@ struct TripListView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
-                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                        NavigationLink(destination:
+                                        TripDetailView(trip: trip,
+                                                                   tripViewModel:
+                                                        viewModel, imageViewModel:
+                                                        imageViewModel)) {
                             TripCardView(trip: trip, imageUrl: trip.imageUrl)
                         }
                     }
@@ -32,7 +36,7 @@ struct TripListView: View {
             )
 
             .sheet(isPresented: $isShowingCreateTrip) {
-                CreateTrip(viewModel: viewModel, imageViewModel: imageViewModel)
+                CreateEditTrip(viewModel: viewModel, imageViewModel: imageViewModel)
             }
         }
     }

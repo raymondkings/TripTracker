@@ -19,7 +19,6 @@ struct ActivityListView: View {
 
     var body: some View {
         VStack {
-            // List with search and filter
             List {
                 ForEach(filteredActivitiesByDate(), id: \.key) { date, activities in
                     Section(header: Text(formattedDate(date))) {
@@ -44,16 +43,20 @@ struct ActivityListView: View {
         }
         .navigationTitle("Activities")
         .navigationBarItems(
-            leading: Button(action: {
-                isShowingDateFilter = true
-            }) {
-                Image(systemName: "calendar")
-            },
-            trailing: Button(action: {
-                activityToEdit = nil
-                isShowingCreateActivity = true
-            }) {
-                Image(systemName: "plus")
+            trailing: HStack {
+                Button(action: {
+                    isShowingDateFilter = true
+                }) {
+                    Image(systemName: "calendar")
+                        .foregroundColor(selectedDate != nil ? .green : .blue)
+                }
+
+                Button(action: {
+                    activityToEdit = nil
+                    isShowingCreateActivity = true
+                }) {
+                    Image(systemName: "plus")
+                }
             }
         )
         .searchable(text: $searchText, prompt: "Search activities")
@@ -65,27 +68,22 @@ struct ActivityListView: View {
         }
     }
 
-    // Filtered activities based on search and selected date
     private func filteredActivitiesByDate() -> [(key: Date, value: [Activity])] {
         let activities = trip.activities ?? []
 
-        // Apply search filter
         let filteredBySearch = activities.filter { activity in
             searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)
         }
 
-        // Apply date filter only if selectedDate is not nil
         let filteredByDate: [Activity]
         if let selectedDate = selectedDate {
             filteredByDate = filteredBySearch.filter { activity in
                 Calendar.current.isDate(activity.date, inSameDayAs: selectedDate)
             }
         } else {
-            // No date filter applied, show all filtered by search
             filteredByDate = filteredBySearch
         }
 
-        // Group activities by date and sort them
         let grouped = Dictionary(grouping: filteredByDate) { activity -> Date in
             Calendar.current.startOfDay(for: activity.date)
         }
@@ -105,8 +103,8 @@ struct ActivityListView: View {
         NavigationView {
             VStack {
                 DatePicker("Select Date", selection: Binding(
-                    get: { selectedDate ?? Date() },  // Use current date if `selectedDate` is nil
-                    set: { newDate in selectedDate = newDate }  // Update `selectedDate` with new date
+                    get: { selectedDate ?? Date() },
+                    set: { newDate in selectedDate = newDate }
                 ), displayedComponents: .date)
                     .datePickerStyle(GraphicalDatePickerStyle())
                     .padding()
@@ -127,4 +125,3 @@ struct ActivityListView: View {
         }
     }
 }
-

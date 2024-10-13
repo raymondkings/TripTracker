@@ -28,7 +28,7 @@ struct CreateEditTrip: View {
                     countrySection()
                 }
                 if createTripViewModel.isLoading {
-                    ProgressView("Creating trip...")
+                    ProgressView("Saving trip...")
                 }
             }
             .navigationBarTitle(isEditing ? "Edit Trip" : "Create Trip", displayMode: .inline)
@@ -48,12 +48,16 @@ struct CreateEditTrip: View {
                 .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
             )
         }
-        .onChange(of: createTripViewModel.searchText) {
-            createTripViewModel.validateCountry()
-        }
         .onAppear {
             if let trip = tripToEdit {
                 loadTripData(trip)
+            }
+        }
+        .onChange(of: createTripViewModel.searchText) { oldCountry, newCountry in
+            if !isEditing || (tripToEdit != nil && oldCountry != newCountry) {
+                Task {
+                    await imageViewModel.searchSinglePhoto(forCountry: newCountry)
+                }
             }
         }
     }

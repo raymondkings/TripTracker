@@ -11,6 +11,7 @@ struct ActivityListView: View {
     @Bindable var viewModel: TripViewModel
     var trip: Trip
     @State private var isShowingCreateActivity = false
+    @State private var activityToEdit: Activity?
 
     var body: some View {
         List {
@@ -18,12 +19,17 @@ struct ActivityListView: View {
                 Section(header: Text(formattedDate(date))) {
                     ForEach(activities) { activity in
                         ActivityCellView(activity: activity)
-                    }
-                    .onDelete { indexSet in
-                        if let index = indexSet.first {
-                            let activity = activities[index]
-                            viewModel.deleteActivity(from: trip, activity: activity)
-                        }
+                            .swipeActions {
+                                Button("Edit") {
+                                    activityToEdit = activity
+                                    isShowingCreateActivity = true
+                                }
+                                .tint(.blue)
+
+                                Button("Delete", role: .destructive) {
+                                    viewModel.deleteActivity(from: trip, activity: activity)
+                                }
+                            }
                     }
                 }
             }
@@ -31,13 +37,14 @@ struct ActivityListView: View {
         .listStyle(.plain)
         .navigationBarItems(
             trailing: Button(action: {
+                activityToEdit = nil
                 isShowingCreateActivity = true
             }) {
                 Image(systemName: "plus")
             }
         )
         .sheet(isPresented: $isShowingCreateActivity) {
-            CreateEditActivity(viewModel: viewModel, trip: trip)
+            CreateEditActivity(viewModel: viewModel, trip: trip, activityToEdit: activityToEdit)
         }
     }
 

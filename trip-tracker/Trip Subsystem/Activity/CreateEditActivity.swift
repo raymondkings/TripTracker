@@ -96,6 +96,8 @@ struct CreateEditActivity: View {
 
             if !isLocationValid && location.isEmpty {
                 Text("Location cannot be empty")
+                    .foregroundColor(.red)
+                    .font(.caption)
             }
         }
     }

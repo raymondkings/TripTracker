@@ -17,9 +17,7 @@ struct ActivityListView: View {
             ForEach(groupedActivitiesByDate(), id: \.key) { date, activities in
                 Section(header: Text(formattedDate(date))) {
                     ForEach(activities) { activity in
-                        NavigationLink(destination: ActivityDetailView(activity: activity)) {
-                            ActivityCellView(activity: activity)
-                        }
+                        ActivityCellView(activity: activity)
                     }
                     .onDelete { indexSet in
                         if let index = indexSet.first {

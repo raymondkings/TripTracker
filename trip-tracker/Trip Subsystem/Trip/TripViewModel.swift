@@ -11,6 +11,7 @@ import Foundation
     var trips: [Trip] = []
 
     init() {
+        let mockActivity = ActivityViewModel().mockActivity
         let mockTrip = Trip(
             id: UUID(),
             name: "Summer Vacation in Italy",
@@ -19,7 +20,7 @@ import Foundation
             country: "Italy",
             imageUrl: nil,
             mock: true,
-            activities: []
+            activities: [mockActivity]
         )
         trips.append(mockTrip)
     }

@@ -100,7 +100,7 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
 
-    // Date Filter Sheet
+    //Sheet for filtering activities based on their date
     @ViewBuilder
     private var dateFilterSheet: some View {
         NavigationView {

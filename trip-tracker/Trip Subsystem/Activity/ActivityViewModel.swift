@@ -13,7 +13,7 @@ import Foundation
     let mockActivity = Activity(
         id: UUID(),
         name: "Visit the Vatican Museum!",
-        description: "blablablablablablablablablablablablablablablablablablablablabla",
+        description: "Entrance fee : 5€, opens at 7 a.m.",
         date: Date(),
         location: "Vatican Museum"
     )

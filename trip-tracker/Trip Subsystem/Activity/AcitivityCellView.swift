@@ -50,12 +50,14 @@ struct ActivityCellView: View {
         }
     }
 
+    //To properly display date
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter
     }()
 
+    //This is a function to redirect to Apple Map, with the location as the search term
     private func openInAppleMaps(with searchText: String) {
         let escapedQuery = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "http://maps.apple.com/?q=\(escapedQuery)"

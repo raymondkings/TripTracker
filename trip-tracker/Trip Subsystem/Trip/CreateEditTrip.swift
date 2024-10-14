@@ -4,45 +4,23 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
-
 import SwiftUI
+import AlertToast
 
 struct CreateEditTrip: View {
     @Bindable var viewModel: TripViewModel
-
-    @State private var tripName: String = ""
-    @State private var startDate = Date()
-    @State private var endDate = Date()
-    @State private var searchText: String = ""
-    @State private var isShowingDropdown = false
-    @State private var isTripNameValid: Bool = true
+    @Bindable var imageViewModel: ImageViewModel
+    @Bindable var createTripViewModel = CreateTripViewModel()
 
     @Environment(\.presentationMode) var presentationMode
 
+    @State private var showImageErrorAlert = false
+    @Binding var showSuccessToast: Bool
+
     var tripToEdit: Trip?
 
-    // Check if we're editing an existing trip
     private var isEditing: Bool {
         return tripToEdit != nil
-    }
-
-    var isFormValid: Bool {
-        !tripName.isEmpty && isValidCountry
-    }
-
-    var countries: [String] {
-        let locale = Locale.current
-        return Locale.Region.isoRegions.compactMap { region in locale.localizedString(forRegionCode: region.identifier)
-        }
-        .sorted()
-    }
-
-    var filteredCountries: [String] {
-        return countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
-    }
-
-    var isValidCountry: Bool {
-        countries.contains(searchText)
     }
 
     var body: some View {
@@ -53,35 +31,67 @@ struct CreateEditTrip: View {
                     durationSection()
                     countrySection()
                 }
-            }
-            .navigationBarTitle(isEditing ? "Edit Trip" : "Create Trip", displayMode: .inline)
-            .navigationBarItems(
-                leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("Back")
-                },
-                trailing: Button(action: saveTrip) {
-                    Text(isEditing ? "Save" : "Create")
+                if createTripViewModel.isLoading {
+                    ProgressView("Saving trip...")
                 }
-                .disabled(!isFormValid)
-            )
-        }
-        .onAppear {
-            if let trip = tripToEdit {
-                loadTripData(trip)
             }
+            .navigationBarTitle(navigationTitle, displayMode: .inline)
+            .navigationBarItems(leading: backButton, trailing: saveButton)
+            .alert(isPresented: $showImageErrorAlert, content: imageErrorAlert)
+        }
+        .onAppear(perform: handleOnAppear)
+    }
+
+    private var navigationTitle: String {
+        isEditing ? "Edit Trip" : "Create Trip"
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Text("Back")
+        }
+    }
+
+    private var saveButton: some View {
+        Button(action: {
+            Task {
+                await saveTrip()
+                showSuccessToast = true
+            }
+        }) {
+            Text(isEditing ? "Save" : "Create")
+        }
+        .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
+    }
+
+    private func imageErrorAlert() -> Alert {
+        Alert(
+            title: Text("Image fetch failed"),
+            message: Text("Image couldn't be loaded for this destination"),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private func successToast() -> AlertToast {
+        AlertToast(type: .complete(Color.green), title: "Trip Saved!")
+    }
+
+    private func handleOnAppear() {
+        if let trip = tripToEdit {
+            loadTripData(trip)
         }
     }
 
     private func tripNameSection() -> some View {
         Section(header: Text("Trip Name")) {
-            TextField("Enter trip name", text: $tripName)
-                .onChange(of: tripName) { _, newValue in
-                    isTripNameValid = !newValue.isEmpty
+            TextField("Enter trip name", text: $createTripViewModel.tripName)
+                .onChange(of: createTripViewModel.tripName) { _, newValue in
+                    createTripViewModel.isTripNameValid = !newValue.isEmpty
                 }
 
-            if !isTripNameValid && tripName.isEmpty {
+            if !createTripViewModel.isTripNameValid && createTripViewModel.tripName.isEmpty {
                 Text("Trip name cannot be empty")
                     .foregroundColor(.red)
                     .font(.caption)
@@ -91,22 +101,36 @@ struct CreateEditTrip: View {
 
     private func durationSection() -> some View {
         Section(header: Text("Duration")) {
-            DatePicker("Start Date", selection: $startDate, in: Date()..., displayedComponents: .date)
-            DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
+            DatePicker(
+                "Start Date",
+                selection: $createTripViewModel.startDate,
+                in: Date()...,
+                displayedComponents: .date
+            )
+            DatePicker(
+                "End Date",
+                selection: $createTripViewModel.endDate,
+                in: createTripViewModel.startDate...,
+                displayedComponents: .date
+            )
         }
     }
 
     private func countrySection() -> some View {
-        Section(header: Text("Country")) {
-            TextField("Search country", text: $searchText, onEditingChanged: handleEditingChanged)
-                .onChange(of: searchText) { _, newValue in
-                    isShowingDropdown = !newValue.isEmpty && !countries.contains(newValue)
-                }
-
-            if isShowingDropdown && !filteredCountries.isEmpty {
-                List(filteredCountries.prefix(10), id: \.self) { country in
+        Section(header: Text("Destination")) {
+            TextField(
+                "Search destination",
+                text: $createTripViewModel.searchText,
+                onEditingChanged: createTripViewModel.handleEditingChanged
+            )
+            .onChange(of: createTripViewModel.searchText) { _, newValue in
+                createTripViewModel.isShowingDropdown =
+                    !newValue.isEmpty && !createTripViewModel.countries.contains(newValue)
+            }
+            if createTripViewModel.isShowingDropdown && !createTripViewModel.filteredCountries.isEmpty {
+                List(createTripViewModel.filteredCountries.prefix(10), id: \.self) { country in
                     Button(action: {
-                        selectCountry(country)
+                        createTripViewModel.selectCountry(country)
                     }) {
                         Text(country)
                     }
@@ -114,49 +138,68 @@ struct CreateEditTrip: View {
                 .frame(height: 25)
             }
 
-            if !isValidCountry && !searchText.isEmpty && filteredCountries.isEmpty {
-                Text("\(searchText) is not a known country")
+            if !createTripViewModel.isValidCountry && !createTripViewModel.searchText.isEmpty {
+                Text("\(createTripViewModel.searchText) is not a known destination")
                     .foregroundColor(.red)
                     .font(.caption)
             }
         }
     }
 
-    private func handleEditingChanged(_ isEditing: Bool) {
-        isShowingDropdown = isEditing && !searchText.isEmpty
-    }
+    private func saveTrip() async {
+        createTripViewModel.isLoading = true
 
-    private func selectCountry(_ country: String) {
-        searchText = country
-        isShowingDropdown = false
-    }
-
-    private func saveTrip() {
-        if isFormValid {
-            if let tripToEdit = tripToEdit {
-                let updatedTrip = Trip(
-                    id: tripToEdit.id,
-                    name: tripName,
-                    startDate: startDate,
-                    endDate: endDate,
-                    country: searchText
-                )
-                viewModel.editTrip(updatedTrip)
-            } else {
-                viewModel.addTrip(name: tripName, country: searchText, startDate: startDate, endDate: endDate)
+        if !isEditing || (tripToEdit != nil && tripToEdit?.country != createTripViewModel.searchText) {
+            do {
+                try await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
+            } catch {
+                showImageErrorAlert = true
+                imageViewModel.imageUrl = nil
             }
+        }
+
+        if let tripToEdit = tripToEdit {
+            let updatedTrip = Trip(
+                id: tripToEdit.id,
+                name: createTripViewModel.tripName,
+                startDate: createTripViewModel.startDate,
+                endDate: createTripViewModel.endDate,
+                country: createTripViewModel.searchText,
+                imageUrl: imageViewModel.imageUrl ?? tripToEdit.imageUrl,
+                mock: tripToEdit.mock
+            )
+            viewModel.editTrip(updatedTrip)
+            presentationMode.wrappedValue.dismiss()
+        } else {
+            let newTrip = Trip(
+                id: UUID(),
+                name: createTripViewModel.tripName,
+                startDate: createTripViewModel.startDate,
+                endDate: createTripViewModel.endDate,
+                country: createTripViewModel.searchText,
+                imageUrl: imageViewModel.imageUrl
+            )
+            viewModel.addTrip(
+                name: newTrip.name,
+                country: newTrip.country,
+                startDate: newTrip.startDate,
+                endDate: newTrip.endDate,
+                imageUrl: newTrip.imageUrl
+            )
             presentationMode.wrappedValue.dismiss()
         }
+
+        createTripViewModel.isLoading = false
+        showSuccessToast = true
     }
 
     private func loadTripData(_ trip: Trip) {
-        tripName = trip.name
-        searchText = trip.country
-        startDate = trip.startDate
-        endDate = trip.endDate
+        createTripViewModel.tripName = trip.name
+        createTripViewModel.searchText = trip.country
+        createTripViewModel.startDate = trip.startDate
+        createTripViewModel.endDate = trip.endDate
+        if let imageUrl = trip.imageUrl {
+            imageViewModel.imageUrl = imageUrl
+        }
     }
-}
-
-#Preview {
-    CreateEditTrip(viewModel: TripViewModel())
 }

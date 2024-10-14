@@ -10,20 +10,27 @@ import Foundation
 @Observable class TripViewModel {
     var trips: [Trip] = []
 
-    let mockTrip = Trip(
-        id: UUID(),
-        name: "Summer Vacation in Italy",
-        startDate: Date(),
-        endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
-        country: "Italy",
-        activities: []
-    )
-
     init() {
+        let mockTrip = Trip(
+            id: UUID(),
+            name: "Summer Vacation in Italy",
+            startDate: Date(),
+            endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
+            country: "Italy",
+            imageUrl: nil,
+            mock: true,
+            activities: []
+        )
         trips.append(mockTrip)
     }
 
-    func addTrip(name: String, country: String, startDate: Date, endDate: Date) {
+    func addTrip(
+        name: String,
+        country: String,
+        startDate: Date,
+        endDate: Date,
+        imageUrl: URL?
+    ) {
         let newTrip = Trip(
             id: UUID(),
             name: name,
@@ -31,6 +38,7 @@ import Foundation
             endDate: endDate,
             country: country,
             activities: []
+            imageUrl: imageUrl
         )
         trips.append(newTrip)
     }
@@ -46,6 +54,7 @@ import Foundation
             trips.remove(at: index)
         }
     }
+<<<<<<< HEAD
 
     func addActivity(to trip: Trip, activity: Activity) {
         if let index = trips.firstIndex(where: { $0.id == trip.id }) {
@@ -65,4 +74,6 @@ import Foundation
         { trips[tripIndex].activities?[activityIndex] = activity
         }
     }
+=======
+>>>>>>> A-1/create-new-trip
 }

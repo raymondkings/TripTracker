@@ -4,6 +4,7 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
+import AlertToast
 import SwiftUI
 
 struct TripListView: View {
@@ -11,23 +12,52 @@ struct TripListView: View {
     @State private var isShowingCreateTrip = false
     @Environment(\.colorScheme) var colorScheme
     @State private var isDarkMode = false
+    @State private var imageViewModel = ImageViewModel()
+    @State private var showSuccessToast = false
 
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(viewModel.trips) { trip in
-                        NavigationLink(destination: ActivityListView(viewModel: viewModel, trip: trip)) {
-                            TripCardView(trip: trip) {
-                                viewModel.deleteTrip(trip)
-                            }
-                        }
+                tripListContent()
+            }
+            .navigationTitle("Trips")
+            .navigationBarItems(trailing: addButton())
+            .sheet(isPresented: $isShowingCreateTrip) {
+                CreateEditTrip(
+                    viewModel: viewModel,
+                    imageViewModel: imageViewModel,
+                    showSuccessToast: $showSuccessToast
+                )
+            }
+            .toast(isPresenting: $showSuccessToast, duration: 2.0) {
+                AlertToast(type: .complete(Color.green), title: "Trip Saved!")
+            }
+        }
+    }
+
+    // MARK: - Extracted Methods
+
+    private func tripListContent() -> some View {
+        VStack(spacing: 16) {
+            ForEach(viewModel.trips) { trip in
+                NavigationLink(
+                    destination: TripDetailView(
+                        trip: trip,
+                        tripViewModel: viewModel,
+                        imageViewModel: imageViewModel
+                    )
+                ) {
+                    TripCardView(trip: trip, imageUrl: trip.imageUrl) {
+                        viewModel.deleteTrip(trip)
                     }
                 }
             }
-            .navigationTitle("Trips")
-            .navigationBarItems(
-                trailing: HStack {
+        }
+        .padding(16)
+    }
+
+    private func addButton() -> some View {
+        HStack {
                     Button(action: {
                         isDarkMode.toggle()
                         toggleColorScheme()
@@ -41,12 +71,6 @@ struct TripListView: View {
                         Image(systemName: "plus")
                     }
                 }
-            )
-            .sheet(isPresented: $isShowingCreateTrip) {
-                CreateEditTrip(viewModel: viewModel)
-            }
-        }
-        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 
     private func toggleColorScheme() {

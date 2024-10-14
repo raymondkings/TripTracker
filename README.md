@@ -48,8 +48,18 @@ Traveling can be an exciting yet overwhelming experience. Sometimes travelers la
 | A-1 | Create new trip                      | Allow users to create a new trip with relevant details like name and dates.  | Major   | Done |
 | A-2 | Edit trip details                    | Allow users to edit trip details such as name, date, and description.        | Major   | Done |
 | A-3 | Delete trip                          | Allow users to delete an existing trip.                                      | Minor   | Done |
+<<<<<<< HEAD
 | A-4 | Create new activity                  | Allow users to add new activities under a specific trip with date, time, etc.| Major   | Pending |
 | A-5 | Edit activity details                | Allow users to edit details of an existing activity.                         | Major   | Pending |
 | A-6 | Delete activity                      | Allow users to delete an activity from the trip.                             | Minor   | Pending |
 | A-7 | Filter activity by date              | Allow users to filter activities by date within a trip.                      | Minor   | Pending |
 | A-8| Show directions to activity location | Provide directions from the user's current location to the activity location.| Minor   | Pending |
+=======
+| A-4 | View trip details                    | Display all details of a specific trip.                                      | Major   | Pending |
+| A-5 | Create new activity                  | Allow users to add new activities under a specific trip with date, time, etc.| Major   | Pending |
+| A-6 | Edit activity details                | Allow users to edit details of an existing activity.                         | Major   | Pending |
+| A-7 | Delete activity                      | Allow users to delete an activity from the trip.                             | Minor   | Pending |
+| A-8 | Filter activity by date              | Allow users to filter activities by date within a trip.                      | Minor   | Pending |
+| A-9 | View activity details                | Display all details of a specific activity.                                  | Major   | Pending |
+| A-10| Show directions to activity location | Provide directions from the user's current location to the activity location.| Minor   | Pending |
+>>>>>>> A-1/create-new-trip

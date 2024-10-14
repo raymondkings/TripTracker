@@ -90,6 +90,7 @@ struct CreateEditTrip: View {
                 .onChange(of: createTripViewModel.tripName) { _, newValue in
                     createTripViewModel.isTripNameValid = !newValue.isEmpty
                 }
+                .multilineTextAlignment(.leading)
 
             if !createTripViewModel.isTripNameValid && createTripViewModel.tripName.isEmpty {
                 Text("Trip name cannot be empty")
@@ -127,6 +128,7 @@ struct CreateEditTrip: View {
                 createTripViewModel.isShowingDropdown =
                     !newValue.isEmpty && !createTripViewModel.countries.contains(newValue)
             }
+            .multilineTextAlignment(.leading)
             if createTripViewModel.isShowingDropdown && !createTripViewModel.filteredCountries.isEmpty {
                 List(createTripViewModel.filteredCountries.prefix(10), id: \.self) { country in
                     Button(action: {

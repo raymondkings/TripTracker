@@ -12,10 +12,10 @@ struct ActivityListView: View {
     var trip: Trip
     @State private var isShowingCreateActivity = false
     @State private var activityToEdit: Activity?
-    
+
     @State private var searchText: String = ""
     @State private var isShowingDateFilter = false
-    @State private var selectedDate: Date? = nil
+    @State private var selectedDate: Date?
 
     var body: some View {
         VStack {
@@ -24,6 +24,10 @@ struct ActivityListView: View {
                     Section(header: Text(formattedDate(date))) {
                         ForEach(activities) { activity in
                             ActivityCellView(activity: activity)
+                                .listRowInsets(EdgeInsets())
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
                                 .swipeActions {
                                     Button("Edit") {
                                         activityToEdit = activity
@@ -39,7 +43,6 @@ struct ActivityListView: View {
                     }
                 }
             }
-            .listStyle(.plain)
         }
         .navigationTitle("Activities")
         .navigationBarItems(

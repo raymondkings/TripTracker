@@ -10,6 +10,9 @@ struct TripCardView: View {
     var trip: Trip
     var imageUrl: URL?
     let onDelete: () -> Void
+    var viewModel: TripViewModel
+
+    @State private var isShowingEditTrip = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -20,9 +23,23 @@ struct TripCardView: View {
         .background(Color(UIColor.systemGray6))
         .cornerRadius(15)
         .contextMenu {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "Trash")
+            Button(action: {
+                isShowingEditTrip.toggle() // Show edit sheet from context menu
+            }) {
+                Label("Edit", systemImage: "pencil")
             }
+
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .sheet(isPresented: $isShowingEditTrip) {
+            CreateEditTrip(
+                viewModel: viewModel,
+                imageViewModel: ImageViewModel(),
+                showSuccessToast: .constant(false),
+                tripToEdit: trip // Pass the selected trip to edit
+            )
         }
         .padding(.horizontal)
     }

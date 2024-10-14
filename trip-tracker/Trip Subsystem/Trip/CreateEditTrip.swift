@@ -4,8 +4,8 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
-import SwiftUI
 import AlertToast
+import SwiftUI
 
 struct CreateEditTrip: View {
     @Bindable var viewModel: TripViewModel
@@ -137,8 +137,8 @@ struct CreateEditTrip: View {
                 }
                 .frame(height: 25)
             }
-            
-            //Error handling if the user tries to input an invalid destination
+
+            // Error handling if the user tries to input an invalid destination
             if !createTripViewModel.isValidCountry && !createTripViewModel.searchText.isEmpty {
                 Text("\(createTripViewModel.searchText) is not a known destination")
                     .foregroundColor(.red)
@@ -147,8 +147,7 @@ struct CreateEditTrip: View {
         }
     }
 
-    
-    private func saveTrip() async { //This is a function for both creating a new activity and editing an existing one
+    private func saveTrip() async { // This is a function for both creating a new activity and editing an existing one
         createTripViewModel.isLoading = true
 
         if !isEditing || (tripToEdit != nil && tripToEdit?.country != createTripViewModel.searchText) {
@@ -174,7 +173,7 @@ struct CreateEditTrip: View {
             presentationMode.wrappedValue.dismiss()
         } else {
             let newTrip = Trip(
-                id: UUID(), //generate the UUID of the trip
+                id: UUID(), // generate the UUID of the trip
                 name: createTripViewModel.tripName,
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,

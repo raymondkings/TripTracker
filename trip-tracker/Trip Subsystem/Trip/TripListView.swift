@@ -47,9 +47,13 @@ struct TripListView: View {
                         viewModel: viewModel, trip: trip
                     )
                 ) {
-                    TripCardView(trip: trip, imageUrl: trip.imageUrl) {
-                        viewModel.deleteTrip(trip)
-                    }
+                    TripCardView(
+                        trip: trip,
+                        imageUrl: trip.imageUrl,
+                        onDelete: {
+                            viewModel.deleteTrip(trip)
+                        }, viewModel: viewModel
+                    )
                 }
             }
         }

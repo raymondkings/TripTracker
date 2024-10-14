@@ -8,10 +8,7 @@ import SwiftUI
 
 struct TripCardView: View {
     var trip: Trip
-<<<<<<< HEAD
-=======
     var imageUrl: URL?
->>>>>>> A-1/create-new-trip
     let onDelete: () -> Void
 
     var body: some View {
@@ -19,25 +16,20 @@ struct TripCardView: View {
             imageGroup
             textGroup
         }
-<<<<<<< HEAD
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.blue)
         .cornerRadius(15)
         .shadow(radius: 5)
-=======
         .frame(width: UIScreen.main.bounds.width - 32, height: 250)
         .background(Color(UIColor.systemGray6))
         .cornerRadius(15)
->>>>>>> A-1/create-new-trip
         .contextMenu {
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "Trash")
             }
         }
         .padding(.horizontal)
-<<<<<<< HEAD
-=======
     }
 
     var imageGroup: some View {
@@ -118,7 +110,6 @@ struct TripCardView: View {
         componentsFormatter.unitsStyle = .short
         componentsFormatter.allowedUnits = [.day]
         return componentsFormatter.string(from: trip.startDate, to: trip.endDate) ?? "N/A"
->>>>>>> A-1/create-new-trip
     }
 }
 

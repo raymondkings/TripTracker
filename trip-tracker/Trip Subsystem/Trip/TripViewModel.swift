@@ -37,8 +37,8 @@ import Foundation
             startDate: startDate,
             endDate: endDate,
             country: country,
+            imageUrl: imageUrl,
             activities: []
-            imageUrl: imageUrl
         )
         trips.append(newTrip)
     }
@@ -54,7 +54,6 @@ import Foundation
             trips.remove(at: index)
         }
     }
-<<<<<<< HEAD
 
     func addActivity(to trip: Trip, activity: Activity) {
         if let index = trips.firstIndex(where: { $0.id == trip.id }) {
@@ -74,6 +73,4 @@ import Foundation
         { trips[tripIndex].activities?[activityIndex] = activity
         }
     }
-=======
->>>>>>> A-1/create-new-trip
 }

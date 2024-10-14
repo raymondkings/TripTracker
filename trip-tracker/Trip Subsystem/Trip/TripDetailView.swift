@@ -11,11 +11,8 @@ struct TripDetailView: View {
     var trip: Trip
     @Bindable var tripViewModel: TripViewModel
     @State private var isShowingEditTrip = false
-<<<<<<< HEAD
-=======
     @State private var showSuccessToast = false
     var imageViewModel: ImageViewModel
->>>>>>> A-1/create-new-trip
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -49,14 +46,6 @@ struct TripDetailView: View {
                 isShowingEditTrip.toggle()
             }) {
                 Image(systemName: "pencil")
-<<<<<<< HEAD
-            }
-        )
-        .sheet(isPresented: $isShowingEditTrip) {
-            CreateEditTrip(viewModel: tripViewModel, tripToEdit: trip)
-=======
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
             }
         )
         .sheet(isPresented: $isShowingEditTrip) {
@@ -66,7 +55,16 @@ struct TripDetailView: View {
                 showSuccessToast: $showSuccessToast,
                 tripToEdit: trip
             )
->>>>>>> A-1/create-new-trip
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
+        }
+        .sheet(isPresented: $isShowingEditTrip) {
+            CreateEditTrip(
+                viewModel: tripViewModel,
+                imageViewModel: imageViewModel,
+                showSuccessToast: $showSuccessToast,
+                tripToEdit: trip
+            )
         }
     }
 }

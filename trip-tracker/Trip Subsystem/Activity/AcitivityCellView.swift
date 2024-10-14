@@ -45,7 +45,6 @@ struct ActivityCellView: View {
                 .padding(.trailing)
         }
         .padding()
-        .background(Color(.systemBackground))
         .onTapGesture {
             openInAppleMaps(with: activity.location)
         }

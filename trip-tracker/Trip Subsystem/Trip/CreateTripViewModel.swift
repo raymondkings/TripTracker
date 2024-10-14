@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+// This viewModel is just used to abstract the createEditTrip since it contains a lot of logic
 @Observable class CreateTripViewModel {
     var tripName: String = ""
     var startDate: Date = .init()

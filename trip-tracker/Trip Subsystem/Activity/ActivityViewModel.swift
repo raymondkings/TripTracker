@@ -21,27 +21,4 @@ import Foundation
     init() {
         activities.append(mockActivity)
     }
-
-    func addActivity(name: String, description: String, date: Date, location : String) {
-        let newActivity = Activity(
-            id: UUID(),
-            name: name,
-            description: description,
-            date: date,
-            location: location
-        )
-        activities.append(newActivity)
-    }
-
-    func editActivity(_ updatedActivity: Activity) {
-        if let index = activities.firstIndex(where: { $0.id == updatedActivity.id }) {
-            activities[index] = updatedActivity
-        }
-    }
-
-    func deleteActivity(_ activity: Activity) {
-        if let index = activities.firstIndex(where: { $0.id == activity.id }) {
-            activities.remove(at: index)
-        }
-    }
 }

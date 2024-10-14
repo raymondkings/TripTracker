@@ -29,7 +29,7 @@ struct TripCardView: View {
 
     var imageGroup: some View {
         if trip.mock == true && imageUrl == nil {
-            return AnyView(
+            return AnyView( //if trip is a mockTrip, return the hardcoded image from assets
                 Image("Rome")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -37,7 +37,7 @@ struct TripCardView: View {
                     .clipped()
             )
         } else if let imageUrl = imageUrl {
-            return AnyView(
+            return AnyView( //if imageUrl is not nil, display the fetched image
                 AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()
@@ -50,7 +50,7 @@ struct TripCardView: View {
                 }
             )
         } else {
-            return AnyView(
+            return AnyView( //return an empty placeholder when API Call failed
                 Color.gray
                     .frame(height: 150)
             )

@@ -103,14 +103,13 @@ struct CreateEditTrip: View {
         Section(header: Text("Duration")) {
             DatePicker(
                 "Start Date",
-                selection: $createTripViewModel.startDate,
-                in: Date()...,
+                selection: $createTripViewModel.startDate, //start date can be anytime
                 displayedComponents: .date
             )
             DatePicker(
                 "End Date",
                 selection: $createTripViewModel.endDate,
-                in: createTripViewModel.startDate...,
+                in: createTripViewModel.startDate..., //end date cannot be before startDate.
                 displayedComponents: .date
             )
         }
@@ -123,6 +122,7 @@ struct CreateEditTrip: View {
                 text: $createTripViewModel.searchText,
                 onEditingChanged: createTripViewModel.handleEditingChanged
             )
+            //reactive watcher to manage the state of the dropdown
             .onChange(of: createTripViewModel.searchText) { _, newValue in
                 createTripViewModel.isShowingDropdown =
                     !newValue.isEmpty && !createTripViewModel.countries.contains(newValue)
@@ -137,7 +137,8 @@ struct CreateEditTrip: View {
                 }
                 .frame(height: 25)
             }
-
+            
+            //Error handling if the user tries to input an invalid destination
             if !createTripViewModel.isValidCountry && !createTripViewModel.searchText.isEmpty {
                 Text("\(createTripViewModel.searchText) is not a known destination")
                     .foregroundColor(.red)
@@ -146,7 +147,8 @@ struct CreateEditTrip: View {
         }
     }
 
-    private func saveTrip() async {
+    
+    private func saveTrip() async { //This is a function for both creating a new activity and editing an existing one
         createTripViewModel.isLoading = true
 
         if !isEditing || (tripToEdit != nil && tripToEdit?.country != createTripViewModel.searchText) {
@@ -172,7 +174,7 @@ struct CreateEditTrip: View {
             presentationMode.wrappedValue.dismiss()
         } else {
             let newTrip = Trip(
-                id: UUID(),
+                id: UUID(), //generate the UUID of the trip
                 name: createTripViewModel.tripName,
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,

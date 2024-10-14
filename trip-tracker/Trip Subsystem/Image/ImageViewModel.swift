@@ -18,7 +18,8 @@ import SwiftUI
         if let url = URL(string: urlString) {
             do {
                 let (data, response) = try await URLSession.shared.data(from: url)
-
+                
+                //Error handling on failed requests
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpResponse.statusCode == 401 {
                         throw URLError(.userAuthenticationRequired)

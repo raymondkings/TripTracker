@@ -102,7 +102,7 @@ struct CreateEditActivity: View {
         }
     }
 
-    private func saveActivity() {
+    private func saveActivity() { //This is function to both create a new or edit an activity
         if isFormValid {
             if let activityToEdit = activityToEdit {
                 let updatedActivity = Activity(

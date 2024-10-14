@@ -70,8 +70,8 @@ import Foundation
 
     func editActivity(from trip: Trip, activity: Activity) {
         if let tripIndex = trips.firstIndex(where: { $0.id == trip.id }),
-           let activityIndex = trips[tripIndex].activities?.firstIndex(where: { $0.id == activity.id })
-        { trips[tripIndex].activities?[activityIndex] = activity
+           let activityIndex = trips[tripIndex].activities?.firstIndex(where: { $0.id == activity.id }) {
+            trips[tripIndex].activities?[activityIndex] = activity
         }
     }
 }

@@ -100,17 +100,19 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
 
-    //Sheet for filtering activities based on their date
-    @ViewBuilder
+    @ViewBuilder //Sheet for filtering activities based on their date
     private var dateFilterSheet: some View {
         NavigationView {
             VStack {
-                DatePicker("Select Date", selection: Binding(
-                    get: { selectedDate ?? Date() },
-                    set: { newDate in selectedDate = newDate }
-                ), displayedComponents: .date)
-                    .datePickerStyle(GraphicalDatePickerStyle())
-                    .padding()
+                DatePicker(
+                    "Select Date",
+                    selection: Binding(
+                        get: { selectedDate ?? Date() },
+                        set: { newDate in selectedDate = newDate }
+                    ), displayedComponents: .date
+                )
+                .datePickerStyle(GraphicalDatePickerStyle())
+                .padding()
 
                 Button("Clear Filter") {
                     selectedDate = nil

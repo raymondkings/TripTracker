@@ -14,4 +14,5 @@ public struct Trip: Identifiable, Codable {
     public var endDate: Date
     public var country: String
     public var imageUrl: URL?
+    var mock: Bool?
 }

@@ -16,11 +16,6 @@ struct TripCardView: View {
             imageGroup
             textGroup
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.blue)
-        .cornerRadius(15)
-        .shadow(radius: 5)
         .frame(width: UIScreen.main.bounds.width - 32, height: 250)
         .background(Color(UIColor.systemGray6))
         .cornerRadius(15)

@@ -9,7 +9,6 @@ import Foundation
 
 @Observable class TripViewModel {
     var trips: [Trip] = []
-    let mockImageUrlString = "https://api.unsplash.com/photos/random?client_id=nVxMNJF2r7WBgA7eDhJKkTFXe--PLpXh6lGUSDLgs0&query=famous tourist attractions in italy"
 
     init() {
         let mockTrip = Trip(
@@ -18,7 +17,8 @@ import Foundation
             startDate: Date(),
             endDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date(),
             country: "Italy",
-            imageUrl: nil
+            imageUrl: nil,
+            mock: true
         )
         trips.append(mockTrip)
     }

@@ -28,7 +28,15 @@ struct TripCardView: View {
     }
 
     var imageGroup: some View {
-        if let imageUrl = imageUrl {
+        if trip.mock == true && imageUrl == nil {
+            return AnyView(
+                Image("Rome")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 150)
+                    .clipped()
+            )
+        } else if let imageUrl = imageUrl {
             return AnyView(
                 AsyncImage(url: imageUrl) { image in
                     image
@@ -43,11 +51,8 @@ struct TripCardView: View {
             )
         } else {
             return AnyView(
-                Image("Rome")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                Color.gray
                     .frame(height: 150)
-                    .clipped()
             )
         }
     }

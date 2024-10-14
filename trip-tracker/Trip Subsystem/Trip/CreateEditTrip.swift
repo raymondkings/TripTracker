@@ -47,17 +47,17 @@ struct CreateEditTrip: View {
                 }
                 .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
             )
+            .alert(isPresented: $showImageErrorAlert) {
+                Alert(
+                    title: Text("Image fetch failed"),
+                    message: Text("Image couldn't be loaded for this destination"),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
         .onAppear {
             if let trip = tripToEdit {
                 loadTripData(trip)
-            }
-        }
-        .onChange(of: createTripViewModel.searchText) { oldCountry, newCountry in
-            if !isEditing || (tripToEdit != nil && oldCountry != newCountry) {
-                Task {
-                    await imageViewModel.searchSinglePhoto(forCountry: newCountry)
-                }
             }
         }
     }
@@ -124,7 +124,20 @@ struct CreateEditTrip: View {
         }
     }
 
+    @State private var showImageErrorAlert = false
+
     private func saveTrip() async {
+        createTripViewModel.isLoading = true
+
+        if !isEditing || (tripToEdit != nil && tripToEdit?.country != createTripViewModel.searchText) {
+            do {
+                try await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
+            } catch {
+                showImageErrorAlert = true
+                imageViewModel.imageUrl = nil
+            }
+        }
+
         if let tripToEdit = tripToEdit {
             let updatedTrip = Trip(
                 id: tripToEdit.id,
@@ -132,26 +145,31 @@ struct CreateEditTrip: View {
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,
                 country: createTripViewModel.searchText,
-                imageUrl: imageViewModel.imageUrl ?? tripToEdit.imageUrl
+                imageUrl: imageViewModel.imageUrl ?? tripToEdit.imageUrl,
+                mock: tripToEdit.mock
             )
             viewModel.editTrip(updatedTrip)
             presentationMode.wrappedValue.dismiss()
         } else {
-            createTripViewModel.isLoading = true
-            await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
-
-            if let imageUrl = imageViewModel.imageUrl {
-                viewModel.addTrip(
-                    name: createTripViewModel.tripName,
-                    country: createTripViewModel.searchText,
-                    startDate: createTripViewModel.startDate,
-                    endDate: createTripViewModel.endDate,
-                    imageUrl: imageUrl
-                )
-                presentationMode.wrappedValue.dismiss()
-            }
-            createTripViewModel.isLoading = false
+            let newTrip = Trip(
+                id: UUID(),
+                name: createTripViewModel.tripName,
+                startDate: createTripViewModel.startDate,
+                endDate: createTripViewModel.endDate,
+                country: createTripViewModel.searchText,
+                imageUrl: imageViewModel.imageUrl
+            )
+            viewModel.addTrip(
+                name: newTrip.name,
+                country: newTrip.country,
+                startDate: newTrip.startDate,
+                endDate: newTrip.endDate,
+                imageUrl: newTrip.imageUrl
+            )
+            presentationMode.wrappedValue.dismiss()
         }
+
+        createTripViewModel.isLoading = false
     }
 
     private func loadTripData(_ trip: Trip) {

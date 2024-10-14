@@ -60,7 +60,7 @@ struct TripCardView: View {
     var textGroup: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(trip.name)
-                .font(.headline)
+                .font(Font.custom("Onest-Bold", size: 18))
                 .foregroundColor(Color.primary)
                 .lineLimit(2)
 

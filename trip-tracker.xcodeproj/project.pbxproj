@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AC1669612CBDB1CA002A8436 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = AC1669602CBDB1CA002A8436 /* AlertToast */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		AC3D5AB22CB5896600B4B4E6 /* trip-tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "trip-tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC1669612CBDB1CA002A8436 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +84,7 @@
 			);
 			name = "trip-tracker";
 			packageProductDependencies = (
+				AC1669602CBDB1CA002A8436 /* AlertToast */,
 			);
 			productName = "trip-tracker";
 			productReference = AC3D5AB22CB5896600B4B4E6 /* trip-tracker.app */;
@@ -108,6 +114,9 @@
 			);
 			mainGroup = AC3D5AA92CB5896600B4B4E6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AC16695F2CBDB1CA002A8436 /* XCRemoteSwiftPackageReference "AlertToast" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AC3D5AB32CB5896600B4B4E6 /* Products */;
 			projectDirPath = "";
@@ -364,6 +373,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AC16695F2CBDB1CA002A8436 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.9;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AC1669602CBDB1CA002A8436 /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC16695F2CBDB1CA002A8436 /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AC3D5AAA2CB5896600B4B4E6 /* Project object */;
 }

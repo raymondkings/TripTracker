@@ -11,6 +11,7 @@ struct TripDetailView: View {
     var trip: Trip
     @Bindable var tripViewModel: TripViewModel
     @State private var isShowingEditTrip = false
+    @State private var showSuccessToast = false
     var imageViewModel: ImageViewModel
 
     var body: some View {
@@ -50,7 +51,12 @@ struct TripDetailView: View {
             }
         )
         .sheet(isPresented: $isShowingEditTrip) {
-            CreateEditTrip(viewModel: tripViewModel, imageViewModel: imageViewModel, tripToEdit: trip)
+            CreateEditTrip(
+                viewModel: tripViewModel,
+                imageViewModel: imageViewModel,
+                showSuccessToast: $showSuccessToast,
+                tripToEdit: trip
+            )
         }
     }
 }

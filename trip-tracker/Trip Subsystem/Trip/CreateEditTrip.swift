@@ -5,6 +5,7 @@
 //  Created by Raymond King on 09.10.24.
 //
 import SwiftUI
+import AlertToast
 
 struct CreateEditTrip: View {
     @Bindable var viewModel: TripViewModel
@@ -12,6 +13,9 @@ struct CreateEditTrip: View {
     @Bindable var createTripViewModel = CreateTripViewModel()
 
     @Environment(\.presentationMode) var presentationMode
+
+    @State private var showImageErrorAlert = false
+    @Binding var showSuccessToast: Bool
 
     var tripToEdit: Trip?
 
@@ -31,34 +35,52 @@ struct CreateEditTrip: View {
                     ProgressView("Saving trip...")
                 }
             }
-            .navigationBarTitle(isEditing ? "Edit Trip" : "Create Trip", displayMode: .inline)
-            .navigationBarItems(
-                leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("Back")
-                },
-                trailing: Button(action: {
-                    Task {
-                        await saveTrip()
-                    }
-                }) {
-                    Text(isEditing ? "Save" : "Create")
-                }
-                .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
-            )
-            .alert(isPresented: $showImageErrorAlert) {
-                Alert(
-                    title: Text("Image fetch failed"),
-                    message: Text("Image couldn't be loaded for this destination"),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+            .navigationBarTitle(navigationTitle, displayMode: .inline)
+            .navigationBarItems(leading: backButton, trailing: saveButton)
+            .alert(isPresented: $showImageErrorAlert, content: imageErrorAlert)
         }
-        .onAppear {
-            if let trip = tripToEdit {
-                loadTripData(trip)
+        .onAppear(perform: handleOnAppear)
+    }
+
+    private var navigationTitle: String {
+        isEditing ? "Edit Trip" : "Create Trip"
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Text("Back")
+        }
+    }
+
+    private var saveButton: some View {
+        Button(action: {
+            Task {
+                await saveTrip()
+                showSuccessToast = true
             }
+        }) {
+            Text(isEditing ? "Save" : "Create")
+        }
+        .disabled(!createTripViewModel.isFormValid || createTripViewModel.isLoading)
+    }
+
+    private func imageErrorAlert() -> Alert {
+        Alert(
+            title: Text("Image fetch failed"),
+            message: Text("Image couldn't be loaded for this destination"),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private func successToast() -> AlertToast {
+        AlertToast(type: .complete(Color.green), title: "Trip Saved!")
+    }
+
+    private func handleOnAppear() {
+        if let trip = tripToEdit {
+            loadTripData(trip)
         }
     }
 
@@ -124,8 +146,6 @@ struct CreateEditTrip: View {
         }
     }
 
-    @State private var showImageErrorAlert = false
-
     private func saveTrip() async {
         createTripViewModel.isLoading = true
 
@@ -170,6 +190,7 @@ struct CreateEditTrip: View {
         }
 
         createTripViewModel.isLoading = false
+        showSuccessToast = true
     }
 
     private func loadTripData(_ trip: Trip) {

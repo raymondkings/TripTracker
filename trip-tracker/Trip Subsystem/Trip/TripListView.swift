@@ -36,6 +36,8 @@ struct TripListView: View {
                     isShowingCreateTrip.toggle()
                 }) {
                     Image(systemName: "plus")
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
             )
 

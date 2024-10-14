@@ -45,6 +45,8 @@ struct TripDetailView: View {
                 isShowingEditTrip.toggle()
             }) {
                 Image(systemName: "pencil")
+                    .frame(width: 100, height: 44)
+                    .contentShape(Rectangle())
             }
         )
         .sheet(isPresented: $isShowingEditTrip) {

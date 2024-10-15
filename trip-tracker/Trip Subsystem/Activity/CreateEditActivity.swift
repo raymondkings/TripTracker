@@ -16,7 +16,6 @@ struct CreateEditActivity: View {
     @State private var location: String = ""
     @State private var isActivityNameValid: Bool = true
     @State private var isLocationValid: Bool = true
-    @State private var isActivityDateValid: Bool = true
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -28,8 +27,7 @@ struct CreateEditActivity: View {
 
     var isFormValid: Bool {
         !activityName.isEmpty &&
-            !location.isEmpty &&
-            isActivityDateValid
+            !location.isEmpty
     }
 
     var body: some View {
@@ -91,9 +89,6 @@ struct CreateEditActivity: View {
                 in: trip.startDate...trip.endDate,
                 displayedComponents: .date
             )
-            .onChange(of: activityDate) { _, newValue in
-                isActivityDateValid = (trip.startDate...trip.endDate).contains(newValue)
-            }
         }
     }
 

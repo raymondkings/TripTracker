@@ -12,7 +12,6 @@ struct TripListView: View {
     @State private var isShowingCreateTrip = false
     @State private var imageViewModel = ImageViewModel()
     @State private var showSuccessToast = false
-    @State private var isDarkMode = false
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -34,7 +33,6 @@ struct TripListView: View {
                 AlertToast(type: .complete(Color.green), title: "Trip Saved!")
             }
         }
-        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
     
     // MARK: - Extracted Methods
@@ -63,26 +61,11 @@ struct TripListView: View {
     private func addButton() -> some View {
         HStack {
             Button(action: {
-                isDarkMode.toggle()
-                toggleColorScheme()
-            }) {
-                Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
-                    .foregroundColor(isDarkMode ? .yellow : .blue)
-            }
-            Button(action: {
                 isShowingCreateTrip.toggle()
             }) {
                 Image(systemName: "plus")
                     .frame(width: 44, height: 44)
             }
-        }
-    }
-
-    private func toggleColorScheme() {
-        if colorScheme == .dark {
-            isDarkMode = false
-        } else {
-            isDarkMode = true
         }
     }
 }

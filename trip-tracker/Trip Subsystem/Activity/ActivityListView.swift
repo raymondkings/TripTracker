@@ -52,6 +52,8 @@ struct ActivityListView: View {
                 }) {
                     Image(systemName: "calendar")
                         .foregroundColor(selectedDate != nil ? .green : .blue)
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
                 }
 
                 Button(action: {
@@ -59,6 +61,8 @@ struct ActivityListView: View {
                     isShowingCreateActivity = true
                 }) {
                     Image(systemName: "plus")
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
                 }
             }
         )
@@ -100,7 +104,7 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
 
-    @ViewBuilder //Sheet for filtering activities based on their date
+    @ViewBuilder // Sheet for filtering activities based on their date
     private var dateFilterSheet: some View {
         NavigationView {
             VStack {

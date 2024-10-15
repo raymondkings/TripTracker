@@ -17,6 +17,9 @@ struct ActivityListView: View {
     @State private var isShowingDateFilter = false
     @State private var selectedDate: Date?
 
+    @State private var isShowingDeleteConfirmation = false // State to show the delete confirmation modal
+    @State private var activityToDelete: Activity? // State to track which activity to delete
+
     var body: some View {
         VStack {
             List {
@@ -36,7 +39,8 @@ struct ActivityListView: View {
                                     .tint(.blue)
 
                                     Button("Delete", role: .destructive) {
-                                        viewModel.deleteActivity(from: trip, activity: activity)
+                                        activityToDelete = activity // Set activity to be deleted
+                                        isShowingDeleteConfirmation = true // Show confirmation modal
                                     }
                                 }
                         }
@@ -72,6 +76,18 @@ struct ActivityListView: View {
         }
         .sheet(isPresented: $isShowingDateFilter) {
             dateFilterSheet
+        }
+        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
+            Alert(
+                title: Text("Delete Activity"),
+                message: Text("Are you sure you want to delete \"\(activityToDelete?.name ?? "")\"?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    if let activity = activityToDelete {
+                        viewModel.deleteActivity(from: trip, activity: activity) // Call delete method
+                    }
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 

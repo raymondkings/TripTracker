@@ -17,8 +17,8 @@ struct ActivityListView: View {
     @State private var isShowingDateFilter = false
     @State private var selectedDate: Date?
 
-    @State private var isShowingDeleteConfirmation = false // State to show the delete confirmation modal
-    @State private var activityToDelete: Activity? // State to track which activity to delete
+    @State private var isShowingDeleteConfirmation = false
+    @State private var activityToDelete: Activity?
 
     var body: some View {
         VStack {
@@ -72,7 +72,16 @@ struct ActivityListView: View {
         )
         .searchable(text: $searchText, prompt: "Search activities")
         .sheet(isPresented: $isShowingCreateActivity) {
-            CreateEditActivity(viewModel: viewModel, trip: trip, activityToEdit: activityToEdit)
+            CreateEditActivity(
+                viewModel: viewModel,
+                trip: trip,
+                activityToEdit: activityToEdit
+            )
+        }
+        .onChange(of: activityToEdit) { _, newValue in
+            if newValue != nil {
+                isShowingCreateActivity = true
+            }
         }
         .sheet(isPresented: $isShowingDateFilter) {
             dateFilterSheet

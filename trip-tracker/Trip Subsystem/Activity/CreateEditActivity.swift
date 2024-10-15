@@ -26,8 +26,7 @@ struct CreateEditActivity: View {
     }
 
     var isFormValid: Bool {
-        !activityName.isEmpty &&
-            !location.isEmpty
+        !activityName.isEmpty && !location.isEmpty
     }
 
     var body: some View {
@@ -55,6 +54,11 @@ struct CreateEditActivity: View {
         }
         .onAppear {
             if let activity = activityToEdit {
+                loadActivityData(activity)
+            }
+        }
+        .onChange(of: activityToEdit) { _, activity in
+            if let activity = activity {
                 loadActivityData(activity)
             }
         }
@@ -86,7 +90,7 @@ struct CreateEditActivity: View {
             DatePicker(
                 "Select Date",
                 selection: $activityDate,
-                in: trip.startDate...trip.endDate,
+                in: trip.startDate ... trip.endDate,
                 displayedComponents: .date
             )
         }

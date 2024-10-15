@@ -72,7 +72,7 @@ struct ActivityListView: View {
     }
 
     private func filteredActivitiesByDate() -> [(key: Date, value: [Activity])] {
-        let activities = trip.activities ?? []
+        let activities = trip.activities
 
         let filteredBySearch = activities.filter { activity in
             searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)

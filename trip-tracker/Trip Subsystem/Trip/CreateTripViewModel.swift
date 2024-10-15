@@ -74,4 +74,3 @@ import os
         logger.info("Reset CreateTripViewModel state.")
     }
 }
-

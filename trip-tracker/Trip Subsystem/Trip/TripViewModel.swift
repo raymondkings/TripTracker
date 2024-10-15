@@ -70,7 +70,7 @@ import os
 
     func addActivity(to trip: Trip, activity: Activity) {
         if let index = trips.firstIndex(where: { $0.id == trip.id }) {
-            trips[index].activities?.append(activity)
+            trips[index].activities.append(activity)
             logger.info("Added activity \(activity.name) to trip \(trip.name).")
         } else {
             logger.error("Failed to find trip \(trip.name) for adding activity \(activity.name).")
@@ -79,7 +79,7 @@ import os
 
     func deleteActivity(from trip: Trip, activity: Activity) {
         if let index = trips.firstIndex(where: { $0.id == trip.id }) {
-            trips[index].activities?.removeAll { $0.id == activity.id }
+            trips[index].activities.removeAll { $0.id == activity.id }
             logger.info("Deleted activity \(activity.name) from trip \(trip.name).")
         } else {
             logger.error("Failed to find trip \(trip.name) for deleting activity \(activity.name).")
@@ -88,8 +88,8 @@ import os
 
     func editActivity(from trip: Trip, activity: Activity) {
         if let tripIndex = trips.firstIndex(where: { $0.id == trip.id }),
-           let activityIndex = trips[tripIndex].activities?.firstIndex(where: { $0.id == activity.id }) {
-            trips[tripIndex].activities?[activityIndex] = activity
+           let activityIndex = trips[tripIndex].activities.firstIndex(where: { $0.id == activity.id }) {
+            trips[tripIndex].activities[activityIndex] = activity
             logger.debug("Activity \(activity.name) edited in trip \(trip.name).")
         } else {
             logger.error("Failed to find trip \(trip.name) or activity \(activity.name) for editing.")

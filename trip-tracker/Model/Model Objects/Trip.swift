@@ -15,5 +15,5 @@ public struct Trip: Identifiable, Codable {
     public var country: String
     public var imageUrl: URL?
     var mock: Bool = false
-    public var activities: [Activity]?
+    public var activities: [Activity] = []
 }

@@ -13,8 +13,6 @@ struct TripListView: View {
     @State private var imageViewModel = ImageViewModel()
     @State private var showSuccessToast = false
     
-    @Environment(\.colorScheme) var colorScheme
-    
     var body: some View {
         NavigationView {
             ScrollView {

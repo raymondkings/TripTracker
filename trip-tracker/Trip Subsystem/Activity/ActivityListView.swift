@@ -113,7 +113,9 @@ struct ActivityListView: View {
                     selection: Binding(
                         get: { selectedDate ?? Date() },
                         set: { newDate in selectedDate = newDate }
-                    ), displayedComponents: .date
+                    ),
+                    in: trip.startDate ... trip.endDate,
+                    displayedComponents: .date
                 )
                 .datePickerStyle(GraphicalDatePickerStyle())
                 .padding()

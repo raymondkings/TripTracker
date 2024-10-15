@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import SwiftUI
 import os
+import SwiftUI
 
 // This viewModel is just used to abstract the createEditTrip since it contains a lot of logic
 @Observable class CreateTripViewModel {
@@ -44,7 +44,7 @@ import os
     func validateCountry() {
         isValidCountry = countries.contains(searchText)
         isShowingDropdown = !searchText.isEmpty && !isValidCountry
-        
+
         if isValidCountry {
             logger.info("Country '\(self.searchText)' is valid.")
         } else {
@@ -62,6 +62,11 @@ import os
         isShowingDropdown = false
         isValidCountry = true
         logger.info("Selected country: \(country). Dropdown closed.")
+    }
+
+    func validateCountry(_ newValue: String) {
+        isValidCountry = countries.contains(newValue)
+        isShowingDropdown = !newValue.isEmpty && !isValidCountry
     }
 
     func reset() {

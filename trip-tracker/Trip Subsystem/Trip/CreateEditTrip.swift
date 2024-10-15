@@ -124,9 +124,8 @@ struct CreateEditTrip: View {
                 onEditingChanged: createTripViewModel.handleEditingChanged
             )
             //reactive watcher to manage the state of the dropdown
-            .onChange(of: createTripViewModel.searchText) { _, newValue in
-                createTripViewModel.isShowingDropdown =
-                    !newValue.isEmpty && !createTripViewModel.countries.contains(newValue)
+            .onChange(of: createTripViewModel.searchText) {
+                createTripViewModel.validateCountry( createTripViewModel.searchText)
             }
             .multilineTextAlignment(.leading)
             if createTripViewModel.isShowingDropdown && !createTripViewModel.filteredCountries.isEmpty {

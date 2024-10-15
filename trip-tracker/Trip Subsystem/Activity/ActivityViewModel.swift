@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import os
 
 @Observable class ActivityViewModel {
+    private let logger = Logger(subsystem: "trip-tracker", category: "ActivityViewModel")
     var activities: [Activity] = []
 
     let mockActivity = Activity(
@@ -20,5 +22,6 @@ import Foundation
 
     init() {
         activities.append(mockActivity)
+        logger.info("Initialized ActivityViewModel with mock activity: \(self.mockActivity.name)")
     }
 }

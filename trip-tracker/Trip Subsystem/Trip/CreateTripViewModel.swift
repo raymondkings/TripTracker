@@ -7,9 +7,11 @@
 
 import Foundation
 import SwiftUI
+import os
 
 // This viewModel is just used to abstract the createEditTrip since it contains a lot of logic
 @Observable class CreateTripViewModel {
+    private let logger = Logger(subsystem: "trip-tracker", category: "CreateTripViewModel")
     var tripName: String = ""
     var startDate: Date = .init()
     var endDate: Date = .init()
@@ -28,6 +30,7 @@ import SwiftUI
                 locale.localizedString(forRegionCode: region.identifier)
             }
             .sorted()
+        logger.info("Initialized CreateTripViewModel with countries: \(self.countries.count) available.")
     }
 
     var isFormValid: Bool {
@@ -41,16 +44,24 @@ import SwiftUI
     func validateCountry() {
         isValidCountry = countries.contains(searchText)
         isShowingDropdown = !searchText.isEmpty && !isValidCountry
+        
+        if isValidCountry {
+            logger.info("Country '\(self.searchText)' is valid.")
+        } else {
+            logger.warning("Country '\(self.searchText)' is not valid.")
+        }
     }
 
     func handleEditingChanged(_ isEditing: Bool) {
         isShowingDropdown = isEditing && !searchText.isEmpty
+        logger.debug("Dropdown showing state changed to \(self.isShowingDropdown) while editing.")
     }
 
     func selectCountry(_ country: String) {
         searchText = country
         isShowingDropdown = false
         isValidCountry = true
+        logger.info("Selected country: \(country). Dropdown closed.")
     }
 
     func reset() {
@@ -60,5 +71,7 @@ import SwiftUI
         isValidCountry = true
         startDate = Date()
         endDate = Date()
+        logger.info("Reset CreateTripViewModel state.")
     }
 }
+

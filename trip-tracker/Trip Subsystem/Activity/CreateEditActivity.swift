@@ -16,6 +16,7 @@ struct CreateEditActivity: View {
     @State private var location: String = ""
     @State private var isActivityNameValid: Bool = true
     @State private var isLocationValid: Bool = true
+    @State private var isActivityDateValid: Bool = true
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -27,7 +28,8 @@ struct CreateEditActivity: View {
 
     var isFormValid: Bool {
         !activityName.isEmpty &&
-            !location.isEmpty
+            !location.isEmpty &&
+            isActivityDateValid
     }
 
     var body: some View {
@@ -83,7 +85,15 @@ struct CreateEditActivity: View {
 
     private func dateSection() -> some View {
         Section(header: Text("Date")) {
-            DatePicker("Select Date", selection: $activityDate, displayedComponents: .date)
+            DatePicker(
+                "Select Date",
+                selection: $activityDate,
+                in: trip.startDate...trip.endDate,
+                displayedComponents: .date
+            )
+            .onChange(of: activityDate) { _, newValue in
+                isActivityDateValid = (trip.startDate...trip.endDate).contains(newValue)
+            }
         }
     }
 

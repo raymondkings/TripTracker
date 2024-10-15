@@ -13,6 +13,7 @@ struct TripCardView: View {
     var viewModel: TripViewModel
 
     @State private var isShowingEditTrip = false
+    @State private var isShowingDeleteConfirmation = false // State to control delete confirmation
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -29,7 +30,9 @@ struct TripCardView: View {
                 Label("Edit", systemImage: "pencil")
             }
 
-            Button(role: .destructive, action: onDelete) {
+            Button(role: .destructive, action: {
+                isShowingDeleteConfirmation = true // Trigger delete confirmation modal
+            }) {
                 Label("Delete", systemImage: "trash")
             }
         }
@@ -41,12 +44,22 @@ struct TripCardView: View {
                 tripToEdit: trip // Pass the selected trip to edit
             )
         }
+        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert modal for delete confirmation
+            Alert(
+                title: Text("Delete Trip"),
+                message: Text("Are you sure you want to delete \"\(trip.name)\"?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    onDelete() // Call the onDelete closure to delete the trip
+                },
+                secondaryButton: .cancel()
+            )
+        }
         .padding(.horizontal)
     }
 
     var imageGroup: some View {
         if trip.mock == true && imageUrl == nil {
-            return AnyView( //if trip is a mockTrip, return the hardcoded image from assets
+            return AnyView( // if trip is a mockTrip, return the hardcoded image from assets
                 Image("Rome")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -54,7 +67,7 @@ struct TripCardView: View {
                     .clipped()
             )
         } else if let imageUrl = imageUrl {
-            return AnyView( //if imageUrl is not nil, display the fetched image
+            return AnyView( // if imageUrl is not nil, display the fetched image
                 AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()
@@ -67,7 +80,7 @@ struct TripCardView: View {
                 }
             )
         } else {
-            return AnyView( //return an empty placeholder when API Call failed
+            return AnyView( // return an empty placeholder when API Call failed
                 Color.gray
                     .frame(height: 150)
             )

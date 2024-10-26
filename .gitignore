@@ -49,3 +49,6 @@ Package.resolved
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+### API Keys or Config Files ###
+Config.swift

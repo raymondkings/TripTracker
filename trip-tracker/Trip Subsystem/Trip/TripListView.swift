@@ -10,6 +10,7 @@ import SwiftUI
 struct TripListView: View {
     @State var viewModel = TripViewModel()
     @State private var isShowingCreateTrip = false
+    @State private var isShowingGenerateTripWithAI = false
     @State private var imageViewModel = ImageViewModel()
     @State private var showSuccessToast = false
     
@@ -27,6 +28,9 @@ struct TripListView: View {
                     showSuccessToast: $showSuccessToast
                 )
             }
+            .sheet(isPresented: $isShowingGenerateTripWithAI, content: {
+                GenerateTripWithAI()
+            })
             .toast(isPresenting: $showSuccessToast, duration: 2.0) {
                 AlertToast(type: .complete(Color.green), title: "Trip Saved!")
             }
@@ -58,9 +62,15 @@ struct TripListView: View {
     
     private func addButton() -> some View {
         HStack {
-            Button(action: {
-                isShowingCreateTrip.toggle()
-            }) {
+            Menu {
+                Button("Create Trip") {
+                    isShowingCreateTrip = true
+                }
+                
+                Button("Generate Trip with AI ✨") {
+                    isShowingGenerateTripWithAI = true
+                }
+            } label: {
                 Image(systemName: "plus")
                     .imageScale(.large)
                     .frame(width: 44, height: 44)
@@ -69,6 +79,6 @@ struct TripListView: View {
     }
 }
     
-#Preview {
-    TripListView()
-}
+//#Preview {
+//    TripListView()
+//}

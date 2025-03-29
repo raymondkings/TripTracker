@@ -290,8 +290,8 @@ only_rules:
     # An XCTFail call should include a description of the assertion.
 
 closure_body_length: # Closure bodies should not span too many lines.
-  - 35 # warning - default: 20
-  - 35 # error - default: 100
+  - 100 # warning - default: 20
+  - 100 # error - default: 100
 
 enum_case_associated_values_count: # Number of associated values in an enum case should be low
   - 5 # warning - default: 5

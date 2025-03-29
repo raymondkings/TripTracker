@@ -3,67 +3,76 @@
 //  trip-tracker
 //
 //  Created by Raymond King on 12.10.24.
+
 import SwiftUI
 
 struct ActivityCellView: View {
     var activity: Activity
+    @State private var isActive = false
 
     var body: some View {
-        HStack {
-            // Category Icon
-            Image(systemName: iconForType(activity.type))
-                .foregroundColor(colorForType(activity.type))
-                .frame(width: 30)
-                .padding(.trailing, 4)
+        ZStack {
+            NavigationLink(destination: ActivityMapDetailView(activity: activity), isActive: $isActive) {
+                EmptyView()
+            }
+            .hidden()
 
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(activity.name)
-                        .font(Font.custom("Onest-Bold", size: 18))
-                        .foregroundColor(.primary)
+            HStack {
+                // Category Icon
+                Image(systemName: iconForType(activity.type))
+                    .foregroundColor(colorForType(activity.type))
+                    .frame(width: 30)
+                    .padding(.trailing, 4)
 
-                    if let badge = badgeText(for: activity) {
-                        Text(badge)
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.2))
-                            .foregroundColor(.blue)
-                            .clipShape(Capsule())
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(activity.name)
+                            .font(Font.custom("Onest-Bold", size: 18))
+                            .foregroundColor(.primary)
+
+                        if let badge = badgeText(for: activity) {
+                            Text(badge)
+                                .font(.caption2)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.2))
+                                .foregroundColor(.blue)
+                                .clipShape(Capsule())
+                        }
+                    }
+
+                    Text(activity.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    HStack {
+                        Image(systemName: "calendar")
+                        Text("Date: \(activity.date, formatter: dateFormatter)")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+
+                        Image(systemName: "location")
+                        Text(activity.location)
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
                     }
                 }
+                .padding(.vertical, 8)
 
-                Text(activity.description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Spacer()
 
-                HStack {
-                    Image(systemName: "calendar")
-                    Text("Date: \(activity.date, formatter: dateFormatter)")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Image(systemName: "location")
-                    Text(activity.location)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                }
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+                    .padding(.trailing)
             }
-            .padding(.vertical, 8)
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
-                .padding(.trailing)
-        }
-        .padding()
-        .background(backgroundForType(activity.type))
-        .cornerRadius(12)
-        .onTapGesture {
-            openInAppleMaps(with: activity.location)
+            .padding()
+            .background(backgroundForType(activity.type))
+            .cornerRadius(12)
+            .onTapGesture {
+                isActive = true
+            }
         }
     }
 
@@ -107,16 +116,6 @@ struct ActivityCellView: View {
         formatter.dateStyle = .medium
         return formatter
     }()
-
-    // MARK: - Open in Maps
-
-    private func openInAppleMaps(with searchText: String) {
-        let escapedQuery = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "http://maps.apple.com/?q=\(escapedQuery)"
-        if let url = URL(string: urlString) {
-            UIApplication.shared.open(url)
-        }
-    }
 }
 
 //#Preview {

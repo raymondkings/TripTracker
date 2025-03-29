@@ -14,12 +14,15 @@ struct TripCardView: View {
     var viewModel: TripViewModel
 
     @State private var isShowingEditTrip = false
-    @State private var isShowingDeleteConfirmation = false // State to control delete confirmation
+    @State private var isShowingDeleteConfirmation = false
+    @State private var isShowingShareSheet = false
+    @State private var shareableFile: ShareFile?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topTrailing) {
                 imageGroup
+
                 if trip.aiGenerated {
                     Text("AI Generated")
                         .font(.caption2)
@@ -39,15 +42,19 @@ struct TripCardView: View {
         .cornerRadius(15)
         .contextMenu {
             Button(action: {
-                isShowingEditTrip.toggle() // Show edit sheet from context menu
+                isShowingEditTrip.toggle()
             }) {
                 Label("Edit", systemImage: "pencil")
             }
 
             Button(role: .destructive, action: {
-                isShowingDeleteConfirmation = true // Trigger delete confirmation modal
+                isShowingDeleteConfirmation = true
             }) {
                 Label("Delete", systemImage: "trash")
+            }
+
+            Button(action: shareTripAsFile) {
+                Label("Share", systemImage: "square.and.arrow.up")
             }
         }
         .sheet(isPresented: $isShowingEditTrip) {
@@ -55,15 +62,18 @@ struct TripCardView: View {
                 viewModel: viewModel,
                 imageViewModel: ImageViewModel(),
                 showSuccessToast: .constant(false),
-                tripToEdit: trip // Pass the selected trip to edit
+                tripToEdit: trip
             )
         }
-        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert modal for delete confirmation
+        .sheet(item: $shareableFile) { shareFile in
+            ActivityView(activityItems: [shareFile.url])
+        }
+        .alert(isPresented: $isShowingDeleteConfirmation) {
             Alert(
                 title: Text("Delete Trip"),
                 message: Text("Are you sure you want to delete \"\(trip.name)\"?"),
                 primaryButton: .destructive(Text("Delete")) {
-                    onDelete() // Call the onDelete closure to delete the trip
+                    onDelete()
                 },
                 secondaryButton: .cancel()
             )
@@ -71,9 +81,33 @@ struct TripCardView: View {
         .padding(.horizontal)
     }
 
+    private func shareTripAsFile() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let data = try JSONEncoder().encode(trip)
+                let tempDir = FileManager.default.temporaryDirectory
+                let fileName = trip.name
+                    .replacingOccurrences(of: " ", with: "_")
+                    + "_trip.json"
+                let fileURL = tempDir.appendingPathComponent(fileName)
+                
+                try data.write(to: fileURL)
+                
+                DispatchQueue.main.async {
+                    shareableFile = ShareFile(url: fileURL)
+                }
+            } catch {
+                print("Failed to create shareable trip file:", error.localizedDescription)
+                DispatchQueue.main.async {
+                    shareableFile = nil
+                }
+            }
+        }
+    }
+
     var imageGroup: some View {
         if trip.mock == true && imageUrl == nil {
-            return AnyView( // if trip is a mockTrip, return the hardcoded image from assets
+            return AnyView(
                 Image("Rome")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -81,7 +115,7 @@ struct TripCardView: View {
                     .clipped()
             )
         } else if let imageUrl = imageUrl {
-            return AnyView( // if imageUrl is not nil, display the fetched image
+            return AnyView(
                 AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()
@@ -94,7 +128,7 @@ struct TripCardView: View {
                 }
             )
         } else {
-            return AnyView( // return an empty placeholder when API Call failed
+            return AnyView(
                 Color.gray
                     .frame(height: 150)
             )
@@ -150,6 +184,16 @@ struct TripCardView: View {
         componentsFormatter.allowedUnits = [.day]
         return componentsFormatter.string(from: trip.startDate, to: trip.endDate) ?? "N/A"
     }
+}
+
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 let dateFormatter: DateFormatter = {

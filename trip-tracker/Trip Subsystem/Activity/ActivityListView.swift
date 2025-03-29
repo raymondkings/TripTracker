@@ -20,25 +20,40 @@ struct ActivityListView: View {
     @State private var isShowingDeleteConfirmation = false
     @State private var activityToDelete: Activity?
     
-    enum ActivityCategory: String, CaseIterable {
-        case all = "All"
-        case activities = "Activities"
-        case accommodations = "Accommodations"
-        case restaurants = "Restaurants"
+    enum ActivityCategory: String, CaseIterable, Hashable {
+        case activity = "Activities"
+        case accommodation = "Accommodations"
+        case restaurant = "Restaurants"
     }
-
-    @State private var selectedCategory: ActivityCategory = .all
+    
+    @State private var selectedCategories: Set<ActivityCategory> = []
 
     var body: some View {
         VStack {
-            Picker("Category", selection: $selectedCategory) {
-                ForEach(ActivityCategory.allCases, id: \.self) { category in
-                    Text(category.rawValue).tag(category)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(ActivityCategory.allCases, id: \.self) { category in
+                        let isSelected = selectedCategories.contains(category)
 
+                        Text(category.rawValue)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? Color.blue : Color.gray.opacity(0.3))
+                            .foregroundColor(isSelected ? .white : .primary)
+                            .clipShape(Capsule())
+                            .onTapGesture {
+                                if isSelected {
+                                    selectedCategories.remove(category)
+                                } else {
+                                    selectedCategories.insert(category)
+                                }
+                            }
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 4)
+            }
+            
             List {
                 ForEach(filteredActivitiesByDate(), id: \.key) { date, activities in
                     Section(header: Text(formattedDate(date))) {
@@ -118,39 +133,45 @@ struct ActivityListView: View {
     }
 
     private func filteredActivitiesByDate() -> [(key: Date, value: [Activity])] {
-        var filtered = trip.activities
-        
-        // Category filtering
-            switch selectedCategory {
-            case .accommodations:
-                filtered = filtered.filter { $0.type == .accommodation }
-            case .restaurants:
-                filtered = filtered.filter { $0.type == .restaurant }
-            case .activities:
-                filtered = filtered.filter { $0.type == .activity }
-            case .all:
-                break
-            }
+        let activities = trip.activities
 
-        let filteredBySearch = filtered.filter { activity in
+        // Step 1: Filter by search text
+        let filteredBySearch = activities.filter { activity in
             searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)
         }
 
+        // Step 2: Filter by selected categories (chips)
+        let filteredByCategory: [Activity]
+        if selectedCategories.isEmpty {
+            filteredByCategory = filteredBySearch // no filter if none selected
+        } else {
+            filteredByCategory = filteredBySearch.filter { activity in
+                switch activity.type {
+                case .activity: return selectedCategories.contains(.activity)
+                case .accommodation: return selectedCategories.contains(.accommodation)
+                case .restaurant: return selectedCategories.contains(.restaurant)
+                }
+            }
+        }
+
+        // Step 3: Filter by selected date (if set)
         let filteredByDate: [Activity]
         if let selectedDate = selectedDate {
-            filteredByDate = filteredBySearch.filter { activity in
+            filteredByDate = filteredByCategory.filter { activity in
                 Calendar.current.isDate(activity.date, inSameDayAs: selectedDate)
             }
         } else {
-            filteredByDate = filteredBySearch
+            filteredByDate = filteredByCategory
         }
 
-        let grouped = Dictionary(grouping: filtered) { activity -> Date in
-                Calendar.current.startOfDay(for: activity.date)
-            }
+        // Step 4: Group by date (start of day) and sort
+        let grouped = Dictionary(grouping: filteredByDate) { activity -> Date in
+            Calendar.current.startOfDay(for: activity.date)
+        }
 
         return grouped.sorted { $0.key < $1.key }
     }
+
 
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()

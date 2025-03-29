@@ -21,9 +21,9 @@ struct ActivityListView: View {
     @State private var activityToDelete: Activity?
     
     enum ActivityCategory: String, CaseIterable, Hashable {
-        case activity = "Activities"
-        case accommodation = "Accommodations"
-        case restaurant = "Restaurants"
+        case activity = "🥳 Activities"
+        case accommodation = "🏠 Accommodations"
+        case restaurant = "🍴 Restaurants"
     }
     
     @State private var selectedCategories: Set<ActivityCategory> = []

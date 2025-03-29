@@ -6,5 +6,6 @@
 //
 
 struct ConfigTemplate {
-    static let accessKey = "YOUR_ACCESS_KEY_HERE"
+    static let unsplashAccessKey = "YOUR_ACCESS_KEY_HERE"
+    static let geminiAPIKey = "AIzaSyDKfJJfSGMrw9mPq64Yj_URcpSgWg5vQAs"
 }

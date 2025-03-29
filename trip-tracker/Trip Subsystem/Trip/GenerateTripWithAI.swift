@@ -32,6 +32,7 @@ struct GenerateTripWithAI: View {
                         text: $createTripViewModel.searchText,
                         onEditingChanged: createTripViewModel.handleEditingChanged
                     )
+
                     .onChange(of: createTripViewModel.searchText) {
                         createTripViewModel.validateCountry( createTripViewModel.searchText)
                     }
@@ -45,7 +46,7 @@ struct GenerateTripWithAI: View {
                                 Text(country)
                             }
                         }
-                        .frame(height: 150)
+                        .frame(height: 20)
                     }
 
                     if !createTripViewModel.isValidCountry && !createTripViewModel.searchText.isEmpty {
@@ -97,6 +98,7 @@ struct GenerateTripWithAI: View {
                     Button(action: generateTripWithAI) {
                         if isSubmitting {
                             ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
                         } else {
                             Text("Generate Trip")
                                 .frame(maxWidth: .infinity)
@@ -146,29 +148,101 @@ struct GenerateTripWithAI: View {
     private func generateTripWithAI() {
         isSubmitting = true
 
+        let request = GeminiTripRequest(
+            country: createTripViewModel.searchText,
+            cities: cities.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) },
+            startDate: iso8601Date(from: startDate),
+            endDate: iso8601Date(from: endDate),
+            tripStyle: selectedStyles.map { $0.rawValue },
+            interests: selectedInterests.map { $0.rawValue },
+            pace: tripPace.rawValue,
+            budgetPerDay: Int(budgetPerDay),
+            dietaryRestrictions: selectedDietaryRestrictions.map { $0.rawValue },
+            accessibilityNeeds: accessibilityNeeds
+        )
+
+        let apiKey = ConfigTemplate.geminiAPIKey
+
+        guard let url = URL(string: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=\(apiKey)") else {
+            generatedJSON = "{ \"error\": \"Invalid URL.\" }"
+            isSubmitting = false
+            return
+        }
+
+        let prompt = """
+        You are a travel assistant. Generate a trip in valid JSON that can be parsed directly into the following Swift types:
+
+        Trip:
+        - id: UUID
+        - name: String
+        - startDate: ISO8601 Date String
+        - endDate: ISO8601 Date String
+        - country: String
+        - imageUrl: URL (optional)
+        - activities: [Activity]
+
+        Activity:
+        - id: UUID
+        - name: String
+        - description: String
+        - date: ISO8601 Date String
+        - location: String
+        - type: Enum (activity, accommodation, restaurant)
+        - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
+
+        Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        Input: \(request)
+        """
+
         let payload: [String: Any] = [
-            "country": createTripViewModel.searchText,
-            "cities": cities.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) },
-            "startDate": iso8601Date(from: startDate),
-            "endDate": iso8601Date(from: endDate),
-            "tripStyle": selectedStyles.map { $0.rawValue },
-            "interests": selectedInterests.map { $0.rawValue },
-            "pace": tripPace.rawValue,
-            "budgetPerDay": Int(budgetPerDay),
-            "dietaryRestrictions": selectedDietaryRestrictions.map { $0.rawValue },
-            "accessibilityNeeds": accessibilityNeeds
+            "contents": [
+                [
+                    "parts": [
+                        ["text": prompt]
+                    ]
+                ]
+            ]
         ]
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            if let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: .prettyPrinted),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                self.generatedJSON = jsonString
-            } else {
-                self.generatedJSON = "{ \"error\": \"Failed to serialize JSON\" }"
-            }
-            self.isSubmitting = false
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
+        } catch {
+            generatedJSON = "{ \"error\": \"Failed to encode request body.\" }"
+            isSubmitting = false
+            return
         }
+
+        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+            DispatchQueue.main.async {
+                if let data = data {
+                    print("Raw Gemini response:\n", String(data: data, encoding: .utf8) ?? "N/A")
+
+                    if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let candidates = json["candidates"] as? [[String: Any]],
+                       let content = candidates.first?["content"] as? [String: Any],
+                       let parts = content["parts"] as? [[String: Any]],
+                       let text = parts.first?["text"] as? String {
+                        print("Gemini parsed text:\n\(text)")
+                        let cleanText = text.replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "")
+                        self.generatedJSON = cleanText
+
+                    } else if let jsonError = try? JSONSerialization.jsonObject(with: data, options: []) {
+                        print("Unexpected JSON structure:\n\(jsonError)")
+                        self.generatedJSON = "{ \"error\": \"Unexpected Gemini response format.\" }"
+                    } else {
+                        self.generatedJSON = "{ \"error\": \"Failed to decode Gemini response.\" }"
+                    }
+                }
+
+                self.isSubmitting = false
+            }
+        }.resume()
     }
+
 
     private func iso8601Date(from date: Date) -> String {
         let formatter = ISO8601DateFormatter()

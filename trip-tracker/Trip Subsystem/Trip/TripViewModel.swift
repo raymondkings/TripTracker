@@ -4,7 +4,6 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
-
 import Foundation
 import os
 
@@ -13,7 +12,6 @@ import os
 
     private let savePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("trips.json")
 
-    
     var trips: [Trip] = [] {
         didSet {
             saveTrips()
@@ -45,19 +43,21 @@ import os
             country: "Italy",
             imageUrl: nil,
             mock: true,
+            aiGenerated: false,
             activities: [mockActivity1, mockActivity2]
         )
         trips.append(mockTrip)
         logger.info("Mock trip \(mockTrip.name) added.")
     }
 
-
     func addTrip(
         name: String,
         country: String,
         startDate: Date,
         endDate: Date,
-        imageUrl: URL?
+        imageUrl: URL?,
+        activities: [Activity] = [],
+        isAIGenerated: Bool = false
     ) {
         let newTrip = Trip(
             id: UUID(),
@@ -66,10 +66,20 @@ import os
             endDate: endDate,
             country: country,
             imageUrl: imageUrl,
-            activities: []
+            mock: false,
+            aiGenerated: isAIGenerated,
+            activities: activities
         )
         trips.append(newTrip)
-        logger.info("New trip \(name) added for country \(country).")
+        logger.info("New trip \(name) added for country \(country). AI generated: \(isAIGenerated)")
+    }
+
+    func addAIGeneratedTrip(_ trip: Trip) {
+        var aiTrip = trip
+        aiTrip.mock = false
+        aiTrip.aiGenerated = true
+        trips.append(aiTrip)
+        logger.info("AI-generated trip \(trip.name) added.")
     }
 
     func editTrip(_ updatedTrip: Trip) {
@@ -89,7 +99,7 @@ import os
             logger.error("Failed to delete trip \(trip.name). Trip not found.")
         }
     }
-    
+
     private func saveTrips() {
         do {
             let data = try JSONEncoder().encode(trips)

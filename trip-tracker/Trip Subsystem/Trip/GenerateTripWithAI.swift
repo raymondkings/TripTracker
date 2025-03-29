@@ -8,6 +8,7 @@ import SwiftUI
 
 struct GenerateTripWithAI: View {
     @State private var createTripViewModel = CreateTripViewModel()
+    @Bindable var tripViewModel: TripViewModel
     @State private var cities: String = ""
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
@@ -173,16 +174,18 @@ struct GenerateTripWithAI: View {
         You are a travel assistant. Generate a trip in valid JSON that can be parsed directly into the following Swift types:
 
         Trip:
-        - id: UUID
+        - id: UUID (as a string)
         - name: String
         - startDate: ISO8601 Date String
         - endDate: ISO8601 Date String
         - country: String
         - imageUrl: URL (optional)
         - activities: [Activity]
+        - mock: Bool (optional)
+        - aiGenerated: Bool (optional)
 
         Activity:
-        - id: UUID
+        - id: UUID (as a string)
         - name: String
         - description: String
         - date: ISO8601 Date String
@@ -190,7 +193,8 @@ struct GenerateTripWithAI: View {
         - type: Enum (activity, accommodation, restaurant)
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
 
-        Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        The Location of an Activity has to be an exact location since it is an input for Map.
+        Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -226,10 +230,30 @@ struct GenerateTripWithAI: View {
                        let content = candidates.first?["content"] as? [String: Any],
                        let parts = content["parts"] as? [[String: Any]],
                        let text = parts.first?["text"] as? String {
-                        print("Gemini parsed text:\n\(text)")
-                        let cleanText = text.replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "")
-                        self.generatedJSON = cleanText
 
+                        print("Gemini parsed text:\n\(text)")
+                        let cleanText = text
+                            .replacingOccurrences(of: "```json", with: "")
+                            .replacingOccurrences(of: "```", with: "")
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+                        if let jsonData = cleanText.data(using: .utf8) {
+                            do {
+                                let decoder = JSONDecoder()
+                                decoder.dateDecodingStrategy = .iso8601
+                                var decodedTrip = try decoder.decode(Trip.self, from: jsonData)
+                                decodedTrip.id = UUID()
+                                decodedTrip.aiGenerated = true
+                                decodedTrip.mock = true
+                                self.tripViewModel.addAIGeneratedTrip(decodedTrip)
+                                self.generatedJSON = "Trip added successfully 🎉"
+                            } catch {
+                                print("Decoding error:", error)
+                                self.generatedJSON = "{ \"error\": \"Failed to decode AI trip: \(error.localizedDescription)\" }"
+                            }
+                        } else {
+                            self.generatedJSON = "{ \"error\": \"Failed to convert Gemini response to data.\" }"
+                        }
                     } else if let jsonError = try? JSONSerialization.jsonObject(with: data, options: []) {
                         print("Unexpected JSON structure:\n\(jsonError)")
                         self.generatedJSON = "{ \"error\": \"Unexpected Gemini response format.\" }"
@@ -242,6 +266,7 @@ struct GenerateTripWithAI: View {
             }
         }.resume()
     }
+
 
 
     private func iso8601Date(from date: Date) -> String {

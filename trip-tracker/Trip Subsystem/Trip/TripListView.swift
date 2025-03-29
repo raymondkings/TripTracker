@@ -29,7 +29,9 @@ struct TripListView: View {
                 )
             }
             .sheet(isPresented: $isShowingGenerateTripWithAI, content: {
-                GenerateTripWithAI()
+                GenerateTripWithAI(
+                    tripViewModel : viewModel
+                )
             })
             .toast(isPresenting: $showSuccessToast, duration: 2.0) {
                 AlertToast(type: .complete(Color.green), title: "Trip Saved!")

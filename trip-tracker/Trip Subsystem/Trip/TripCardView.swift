@@ -4,6 +4,7 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
+
 import SwiftUI
 
 struct TripCardView: View {
@@ -17,7 +18,20 @@ struct TripCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            imageGroup
+            ZStack(alignment: .topTrailing) {
+                imageGroup
+                if trip.aiGenerated {
+                    Text("AI Generated")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.blue.opacity(0.8))
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                        .padding([.top, .trailing], 8)
+                }
+            }
             textGroup
         }
         .frame(width: UIScreen.main.bounds.width - 32, height: 250)

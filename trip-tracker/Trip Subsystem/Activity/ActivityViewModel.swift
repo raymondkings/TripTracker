@@ -17,7 +17,8 @@ import os
         name: "Visit the Vatican Museum!",
         description: "Entrance fee : 5€, opens at 7 a.m.",
         date: Date(),
-        location: "Vatican Museum"
+        location: "Vatican Museum",
+        type: ActivityType.activity
     )
     
     let mockActivity2 = Activity(
@@ -25,7 +26,8 @@ import os
         name: "Visit the Trevi Fountain",
         description: "Entrance fee : free, opens 24/7",
         date: Date(),
-        location: "Trevi Fountain"
+        location: "Trevi Fountain",
+        type: ActivityType.activity
     )
 
     init() {

@@ -73,7 +73,8 @@ struct ActivityCellView: View {
         name: "Test Activity",
         description: "This is a very fun activity!",
         date: Date(),
-        location: "Vatican Museum"
+        location: "Vatican Museum",
+        type: ActivityType.activity
     )
     ActivityCellView(activity: newActivity)
 }

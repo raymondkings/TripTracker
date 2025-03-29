@@ -103,10 +103,13 @@ import os
     private func loadTrips() {
         do {
             let data = try Data(contentsOf: savePath)
-            trips = try JSONDecoder().decode([Trip].self, from: data)
+            let decodedTrips = try JSONDecoder().decode([Trip].self, from: data)
+            trips = decodedTrips
             logger.info("Trips loaded.")
         } catch {
-            logger.warning("No saved trips found or failed to load: \(error.localizedDescription)")
+            logger.warning("Failed to load trips. Resetting to mock data. Error: \(error.localizedDescription)")
+            loadMockData()
+            saveTrips()
         }
     }
 

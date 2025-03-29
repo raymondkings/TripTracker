@@ -19,9 +19,26 @@ struct ActivityListView: View {
 
     @State private var isShowingDeleteConfirmation = false
     @State private var activityToDelete: Activity?
+    
+    enum ActivityCategory: String, CaseIterable {
+        case all = "All"
+        case activities = "Activities"
+        case accommodations = "Accommodations"
+        case restaurants = "Restaurants"
+    }
+
+    @State private var selectedCategory: ActivityCategory = .all
 
     var body: some View {
         VStack {
+            Picker("Category", selection: $selectedCategory) {
+                ForEach(ActivityCategory.allCases, id: \.self) { category in
+                    Text(category.rawValue).tag(category)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+
             List {
                 ForEach(filteredActivitiesByDate(), id: \.key) { date, activities in
                     Section(header: Text(formattedDate(date))) {
@@ -101,9 +118,21 @@ struct ActivityListView: View {
     }
 
     private func filteredActivitiesByDate() -> [(key: Date, value: [Activity])] {
-        let activities = trip.activities
+        var filtered = trip.activities
+        
+        // Category filtering
+            switch selectedCategory {
+            case .accommodations:
+                filtered = filtered.filter { $0.type == .accommodation }
+            case .restaurants:
+                filtered = filtered.filter { $0.type == .restaurant }
+            case .activities:
+                filtered = filtered.filter { $0.type == .activity }
+            case .all:
+                break
+            }
 
-        let filteredBySearch = activities.filter { activity in
+        let filteredBySearch = filtered.filter { activity in
             searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)
         }
 
@@ -116,9 +145,9 @@ struct ActivityListView: View {
             filteredByDate = filteredBySearch
         }
 
-        let grouped = Dictionary(grouping: filteredByDate) { activity -> Date in
-            Calendar.current.startOfDay(for: activity.date)
-        }
+        let grouped = Dictionary(grouping: filtered) { activity -> Date in
+                Calendar.current.startOfDay(for: activity.date)
+            }
 
         return grouped.sorted { $0.key < $1.key }
     }

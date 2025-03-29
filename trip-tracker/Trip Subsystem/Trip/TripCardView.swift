@@ -54,7 +54,7 @@ struct TripCardView: View {
             }
 
             Button(action: shareTripAsFile) {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label("Export", systemImage: "square.and.arrow.up")
             }
         }
         .sheet(isPresented: $isShowingEditTrip) {
@@ -84,7 +84,11 @@ struct TripCardView: View {
     private func shareTripAsFile() {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                let data = try JSONEncoder().encode(trip)
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted
+                encoder.dateEncodingStrategy = .iso8601
+                
+                let data = try encoder.encode(trip)
                 let tempDir = FileManager.default.temporaryDirectory
                 let fileName = trip.name
                     .replacingOccurrences(of: " ", with: "_")

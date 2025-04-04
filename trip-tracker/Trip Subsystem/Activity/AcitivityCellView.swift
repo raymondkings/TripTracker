@@ -46,28 +46,32 @@ struct ActivityCellView: View {
                             Text(activity.name)
                                 .font(Font.custom("Onest-Bold", size: 18))
                                 .foregroundColor(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
 
                             Spacer()
 
                             Button(action: {
-                                withAnimation {
-                                    isExpanded.toggle()
-                                }
+                                isExpanded.toggle()
                             }) {
                                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                                     .foregroundColor(.gray)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
+                        .contentShape(Rectangle())
 
                         if isExpanded {
-                            Text(activity.description)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(activity.description)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
 
-                            Text(activity.location)
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
+                                Text(activity.location)
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                            .transition(.opacity)
+                            .animation(.easeInOut(duration: 0.25), value: isExpanded)
                         }
                     }
                     .padding(.vertical, 8)

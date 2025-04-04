@@ -130,6 +130,7 @@ struct MapViewWrappers: UIViewRepresentable {
 
             if let coloredAnnotation = annotation as? ColoredAnnotation {
                 annotationView?.markerTintColor = coloredAnnotation.markerTintColor
+                annotationView?.displayPriority = .required
             }
 
             return annotationView

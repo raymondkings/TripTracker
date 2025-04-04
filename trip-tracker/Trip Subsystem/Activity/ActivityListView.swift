@@ -163,7 +163,6 @@ struct ActivityListView: View {
             .listRowInsets(EdgeInsets())
             .frame(maxWidth: .infinity)
             .padding(.horizontal)
-            .padding(.vertical, 8)
             .listRowBackground(Color.clear)
             .swipeActions {
                 Button("Edit") {

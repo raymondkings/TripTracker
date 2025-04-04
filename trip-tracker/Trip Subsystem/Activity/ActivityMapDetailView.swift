@@ -34,7 +34,8 @@ struct ActivityMapDetailView: View {
     @State private var region = MKCoordinateRegion()
     @State private var activityCoordinate: CLLocationCoordinate2D?
     @State private var travelTimes: [TransportOption: TimeInterval] = [:]
-    @State private var route: MKRoute?
+    @State private var routes: [UInt: MKRoute] = [:]
+    @State private var selectedTransportOption: TransportOption = TransportOption(label: "Walking", systemImage: "figure.walk", rawType: MKDirectionsTransportType.walking.rawValue)
     @State private var mapView: MKMapView? = nil
 
     let transportOptions: [TransportOption] = [
@@ -47,7 +48,7 @@ struct ActivityMapDetailView: View {
             if let activityCoordinate {
                 MapViewWrapper(
                     activity: activity,
-                    route: route,
+                    route: routes[selectedTransportOption.rawType],
                     activityCoordinate: activityCoordinate,
                     userCoordinate: locationManager.location,
                     mapView: $mapView
@@ -79,36 +80,13 @@ struct ActivityMapDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing)
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(activity.name)
-                            .font(.headline)
-
-                        Text(activity.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-
-                        Text("\u{1F4CD} \(activity.location)")
-                            .font(.caption)
-
-                        Text("\u{1F4C6} \(activity.date, formatter: dateFormatter)")
-                            .font(.caption)
-
-                        ForEach(transportOptions) { option in
-                            HStack {
-                                Image(systemName: option.systemImage)
-                                Text(option.label)
-                                if let time = travelTimes[option] {
-                                    Text("~\(Int(time / 60)) min")
-                                        .foregroundColor(.secondary)
-                                } else {
-                                    ProgressView()
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(20)
+                    TripDetailsCard(
+                        activity: activity,
+                        travelTimes: travelTimes,
+                        transportOptions: transportOptions,
+                        selectedTransportOption: $selectedTransportOption,
+                        dateFormatter: dateFormatter
+                    )
                 }
             }
         }
@@ -162,10 +140,7 @@ struct ActivityMapDetailView: View {
                 if let resultRoute = response?.routes.first {
                     DispatchQueue.main.async {
                         self.travelTimes[option] = resultRoute.expectedTravelTime
-
-                        if option.type == .walking {
-                            self.route = resultRoute
-                        }
+                        self.routes[option.rawType] = resultRoute
                     }
                 }
             }
@@ -177,6 +152,44 @@ struct ActivityMapDetailView: View {
         formatter.dateStyle = .medium
         return formatter
     }()
+}
+
+struct TripDetailsCard: View {
+    var activity: Activity
+    var travelTimes: [TransportOption: TimeInterval]
+    var transportOptions: [TransportOption]
+    @Binding var selectedTransportOption: TransportOption
+    var dateFormatter: DateFormatter
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(activity.name)
+                .font(.headline)
+
+            Text(activity.description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Text("\u{1F4CD} \(activity.location)")
+                .font(.caption)
+
+            Text("\u{1F4C6} \(activity.date, formatter: dateFormatter)")
+                .font(.caption)
+
+            Picker("Transport Mode", selection: $selectedTransportOption) {
+                ForEach(transportOptions) { option in
+                    if let time = travelTimes[option] {
+                        Text("\(option.label) ~\(Int(time / 60)) min")
+                            .tag(option)
+                    }
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+    }
 }
 
 struct CircleMapControlButton: View {

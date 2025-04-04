@@ -104,7 +104,6 @@ struct TripListView: View {
         case .success(let urls):
             guard let selectedURL = urls.first else { return }
 
-            // Start accessing security-scoped resource
             guard selectedURL.startAccessingSecurityScopedResource() else {
                 importErrorMessage = "Permission denied to access the file."
                 showErrorToast = true
@@ -117,18 +116,31 @@ struct TripListView: View {
 
             do {
                 let data = try Data(contentsOf: selectedURL)
-                print(String(data: data, encoding: .utf8) ?? "Invalid JSON data")
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                var importedTrip = try decoder.decode(Trip.self, from: data)
+                var exportable = try decoder.decode(ExportableTrip.self, from: data)
 
-                importedTrip.id = UUID() // Prevent conflict with existing UUID
+                // Decode image and save it locally
+                var localImageFilename: String? = nil
+                if let base64 = exportable.imageBase64,
+                   let imageData = Data(base64Encoded: base64) {
+                    let filename = UUID().uuidString + ".jpg"
+                    let imageURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                        .appendingPathComponent(filename)
+                    try imageData.write(to: imageURL)
+                    localImageFilename = filename
+                }
+
+                // Finalize the trip
+                var importedTrip = exportable.trip
+                importedTrip.id = UUID()
                 importedTrip.mock = false
+                importedTrip.localImageFilename = localImageFilename
 
                 viewModel.trips.append(importedTrip)
                 showSuccessToast = true
             } catch {
-                importErrorMessage = "Failed to decode trip JSON"
+                importErrorMessage = "Failed to import trip JSON"
                 showErrorToast = true
                 print("Failed to import trip:", error.localizedDescription)
             }

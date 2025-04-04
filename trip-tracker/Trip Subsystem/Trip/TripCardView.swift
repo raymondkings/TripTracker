@@ -84,19 +84,31 @@ struct TripCardView: View {
     private func shareTripAsFile() {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
+                var imageBase64: String? = nil
+
+                if let localFilename = trip.localImageFilename {
+                    let imageURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                        .appendingPathComponent(localFilename)
+                    let imageData = try? Data(contentsOf: imageURL)
+                    imageBase64 = imageData?.base64EncodedString()
+                }
+
+                let exportable = ExportableTrip(trip: trip, imageBase64: imageBase64)
+
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
                 encoder.dateEncodingStrategy = .iso8601
-                
-                let data = try encoder.encode(trip)
+
+                let data = try encoder.encode(exportable)
+
                 let tempDir = FileManager.default.temporaryDirectory
                 let fileName = trip.name
                     .replacingOccurrences(of: " ", with: "_")
                     + "_trip.json"
                 let fileURL = tempDir.appendingPathComponent(fileName)
-                
+
                 try data.write(to: fileURL)
-                
+
                 DispatchQueue.main.async {
                     shareableFile = ShareFile(url: fileURL)
                 }

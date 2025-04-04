@@ -14,8 +14,8 @@ struct ActivityMapOverviewView: View {
 
     @StateObject private var locationManager = LocationManager()
     @State private var region = MKCoordinateRegion()
-    @State private var annotations: [MKPointAnnotation] = []
-    @State private var mapView: MKMapView? = nil
+    @State private var annotations: [ColoredAnnotation] = []
+    @State private var mapView: MKMapView?
 
     var body: some View {
         ZStack {
@@ -31,7 +31,7 @@ struct ActivityMapOverviewView: View {
 
     private func geocodeActivities() {
         let activities = trip.activities
-        var newAnnotations: [MKPointAnnotation] = []
+        var newAnnotations: [ColoredAnnotation] = []
         let dispatchGroup = DispatchGroup()
 
         for activity in activities {
@@ -47,7 +47,7 @@ struct ActivityMapOverviewView: View {
             }
 
             let search = MKLocalSearch(request: request)
-            search.start { response, error in
+            search.start { response, _ in
                 defer { dispatchGroup.leave() }
 
                 guard let coordinate = response?.mapItems.first?.placemark.coordinate else {
@@ -55,10 +55,20 @@ struct ActivityMapOverviewView: View {
                     return
                 }
 
-                let annotation = MKPointAnnotation()
+                let annotation = ColoredAnnotation()
                 annotation.coordinate = coordinate
                 annotation.title = activity.name
                 annotation.subtitle = activity.location
+
+                switch activity.type {
+                case .activity:
+                    annotation.markerTintColor = .systemBlue
+                case .accommodation:
+                    annotation.markerTintColor = .systemPurple
+                case .restaurant:
+                    annotation.markerTintColor = .systemOrange
+                }
+
                 newAnnotations.append(annotation)
             }
         }
@@ -72,8 +82,12 @@ struct ActivityMapOverviewView: View {
     }
 }
 
+class ColoredAnnotation: MKPointAnnotation {
+    var markerTintColor: UIColor?
+}
+
 struct MapViewWrappers: UIViewRepresentable {
-    var annotations: [MKPointAnnotation]
+    var annotations: [ColoredAnnotation]
     @Binding var region: MKCoordinateRegion
     @Binding var mapView: MKMapView?
 
@@ -98,5 +112,27 @@ struct MapViewWrappers: UIViewRepresentable {
         Coordinator()
     }
 
-    class Coordinator: NSObject, MKMapViewDelegate {}
+    class Coordinator: NSObject, MKMapViewDelegate {
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            if annotation is MKUserLocation {
+                return nil
+            }
+
+            let identifier = "ActivityMarker"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+            if annotationView == nil {
+                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+            } else {
+                annotationView?.annotation = annotation
+            }
+
+            if let coloredAnnotation = annotation as? ColoredAnnotation {
+                annotationView?.markerTintColor = coloredAnnotation.markerTintColor
+            }
+
+            return annotationView
+        }
+    }
 }

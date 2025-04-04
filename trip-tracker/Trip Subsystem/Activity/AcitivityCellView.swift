@@ -9,6 +9,7 @@ import SwiftUI
 struct ActivityCellView: View {
     var activity: Activity
     @State private var isActive = false
+    @State private var isExpanded = false
 
     var body: some View {
         ZStack {
@@ -23,13 +24,24 @@ struct ActivityCellView: View {
                         .fill(colorForType(activity.type).opacity(0.15))
                         .frame(width: 60)
                         .cornerRadius(12, corners: [.topLeft, .bottomLeft])
-                    
-                    Image(systemName: iconForType(activity.type))
-                        .foregroundColor(colorForType(activity.type))
-                        .frame(width: 30)
-                        .padding(.trailing, 4)
+                    VStack {
+                        Image(systemName: iconForType(activity.type))
+                            .foregroundColor(colorForType(activity.type))
+                            .frame(width: 30)
+                            .padding(.trailing, 4)
+                        if let badge = badgeText(for: activity) {
+                            Text(badge)
+                                .font(.caption2)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.2))
+                                .foregroundColor(.blue)
+                                .clipShape(Capsule())
+                        }
+                    }
                 }
 
+                // Right content section
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -37,33 +49,32 @@ struct ActivityCellView: View {
                                 .font(Font.custom("Onest-Bold", size: 18))
                                 .foregroundColor(.primary)
 
-                            if let badge = badgeText(for: activity) {
-                                Text(badge)
-                                    .font(.caption2)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.blue.opacity(0.2))
-                                    .foregroundColor(.blue)
-                                    .clipShape(Capsule())
+                            Spacer()
+
+                            Button(action: {
+                                withAnimation {
+                                    isExpanded.toggle()
+                                }
+                            }) {
+                                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                    .foregroundColor(.gray)
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
 
-                        Text(activity.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        if isExpanded {
+                            Text(activity.description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
 
-                        Text(activity.location)
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        
+                            Text(activity.location)
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding(.vertical, 8)
 
                     Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
-                        .padding(.trailing)
                 }
                 .padding()
                 .background(Color(.systemBackground))

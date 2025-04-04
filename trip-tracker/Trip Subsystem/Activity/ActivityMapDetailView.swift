@@ -37,6 +37,7 @@ struct ActivityMapDetailView: View {
     @State private var routes: [UInt: MKRoute] = [:]
     @State private var selectedTransportOption: TransportOption = TransportOption(label: "Walking", systemImage: "figure.walk", rawType: MKDirectionsTransportType.walking.rawValue)
     @State private var mapView: MKMapView? = nil
+    @State private var isTrackingUser: Bool = false
 
     let transportOptions: [TransportOption] = [
         TransportOption(label: "Driving", systemImage: "car.fill", rawType: MKDirectionsTransportType.automobile.rawValue),
@@ -51,7 +52,8 @@ struct ActivityMapDetailView: View {
                     route: routes[selectedTransportOption.rawType],
                     activityCoordinate: activityCoordinate,
                     userCoordinate: locationManager.location,
-                    mapView: $mapView
+                    mapView: $mapView,
+                    isTrackingUser: $isTrackingUser
                 )
                 .ignoresSafeArea()
             } else {
@@ -63,10 +65,10 @@ struct ActivityMapDetailView: View {
             if let _ = activityCoordinate {
                 VStack {
                     HStack(spacing: 12) {
-                        if let mapView = mapView, let userLocation = locationManager.location {
-                            CircleMapControlButton(systemImage: "location.fill") {
-                                let region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-                                mapView.setRegion(region, animated: true)
+                        CircleMapControlButton(systemImage: isTrackingUser ? "location.fill" : "location") {
+                            if let mapView = mapView {
+                                let newMode: MKUserTrackingMode = (mapView.userTrackingMode == .none) ? .followWithHeading : .none
+                                mapView.setUserTrackingMode(newMode, animated: true)
                             }
                         }
 
@@ -215,6 +217,7 @@ struct MapViewWrapper: UIViewRepresentable {
     var activityCoordinate: CLLocationCoordinate2D
     var userCoordinate: CLLocationCoordinate2D?
     @Binding var mapView: MKMapView?
+    @Binding var isTrackingUser: Bool
 
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
@@ -239,13 +242,41 @@ struct MapViewWrapper: UIViewRepresentable {
         if let polyline = route?.polyline {
             uiView.addOverlay(polyline)
         }
+
+        uiView.setUserTrackingMode(isTrackingUser ? .followWithHeading : .none, animated: true)
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(parent: self)
     }
 
     class Coordinator: NSObject, MKMapViewDelegate {
+        var parent: MapViewWrapper
+
+        init(parent: MapViewWrapper) {
+            self.parent = parent
+        }
+
+        func mapView(_ mapView: MKMapView, didChange mode: MKUserTrackingMode, animated: Bool) {
+            DispatchQueue.main.async {
+                self.parent.isTrackingUser = (mode != .none)
+            }
+        }
+
+        func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+            // Detect if the user is interacting with the map (via gesture)
+            if let view = mapView.subviews.first {
+                for recognizer in view.gestureRecognizers ?? [] {
+                    if recognizer.state == .began || recognizer.state == .ended {
+                        DispatchQueue.main.async {
+                            self.parent.isTrackingUser = false
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
@@ -256,4 +287,5 @@ struct MapViewWrapper: UIViewRepresentable {
             return MKOverlayRenderer()
         }
     }
+
 }

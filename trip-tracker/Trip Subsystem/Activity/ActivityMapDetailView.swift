@@ -4,6 +4,7 @@
 //
 //  Created by Raymond King on 29.03.25.
 //
+
 import SwiftUI
 import MapKit
 import CoreLocation
@@ -45,6 +46,7 @@ struct ActivityMapDetailView: View {
         ZStack(alignment: .bottomTrailing) {
             if let activityCoordinate {
                 MapViewWrapper(
+                    activity: activity,
                     route: route,
                     activityCoordinate: activityCoordinate,
                     userCoordinate: locationManager.location,
@@ -107,6 +109,7 @@ struct ActivityMapDetailView: View {
                     .padding()
                     .background(.ultraThinMaterial)
                     .cornerRadius(20)
+                    .padding()
                 }
             }
         }
@@ -194,6 +197,7 @@ struct CircleMapControlButton: View {
 }
 
 struct MapViewWrapper: UIViewRepresentable {
+    var activity: Activity
     var route: MKRoute?
     var activityCoordinate: CLLocationCoordinate2D
     var userCoordinate: CLLocationCoordinate2D?
@@ -206,7 +210,7 @@ struct MapViewWrapper: UIViewRepresentable {
 
         let activityAnnotation = MKPointAnnotation()
         activityAnnotation.coordinate = activityCoordinate
-        activityAnnotation.title = "Activity Location"
+        activityAnnotation.title = activity.location
         map.addAnnotation(activityAnnotation)
 
         DispatchQueue.main.async {

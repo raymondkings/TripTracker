@@ -4,6 +4,7 @@
 //
 //  Created by Raymond King on 29.03.25.
 //
+
 import SwiftUI
 import MapKit
 import CoreLocation
@@ -33,6 +34,7 @@ struct ActivityMapDetailView: View {
     @State private var region = MKCoordinateRegion()
     @State private var activityCoordinate: CLLocationCoordinate2D?
     @State private var travelTimes: [TransportOption: TimeInterval] = [:]
+    @State private var route: MKRoute?
 
     let transportOptions: [TransportOption] = [
         TransportOption(label: "Driving", systemImage: "car.fill", rawType: MKDirectionsTransportType.automobile.rawValue),
@@ -42,10 +44,8 @@ struct ActivityMapDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             if let activityCoordinate {
-                Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: [activity]) { _ in
-                    MapMarker(coordinate: activityCoordinate, tint: .blue)
-                }
-                .ignoresSafeArea()
+                MapViewWrapper(region: $region, route: route, activityCoordinate: activityCoordinate, userCoordinate: locationManager.location)
+                    .ignoresSafeArea()
             } else {
                 ProgressView("Loading map...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -67,10 +67,10 @@ struct ActivityMapDetailView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
 
-                        Text("📍 \(activity.location)")
+                        Text("\u{1F4CD} \(activity.location)")
                             .font(.caption)
 
-                        Text("📆 \(activity.date, formatter: dateFormatter)")
+                        Text("\u{1F4C6} \(activity.date, formatter: dateFormatter)")
                             .font(.caption)
 
                         ForEach(transportOptions) { option in
@@ -102,7 +102,6 @@ struct ActivityMapDetailView: View {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = activity.location
 
-        // Use user's location (if available) to bias the search region
         if let userCoord = locationManager.location {
             request.region = MKCoordinateRegion(
                 center: userCoord,
@@ -146,9 +145,13 @@ struct ActivityMapDetailView: View {
 
             let directions = MKDirections(request: request)
             directions.calculate { response, error in
-                if let route = response?.routes.first {
+                if let resultRoute = response?.routes.first {
                     DispatchQueue.main.async {
-                        self.travelTimes[option] = route.expectedTravelTime
+                        self.travelTimes[option] = resultRoute.expectedTravelTime
+
+                        if option.type == .walking {
+                            self.route = resultRoute
+                        }
                     }
                 }
             }
@@ -160,4 +163,51 @@ struct ActivityMapDetailView: View {
         formatter.dateStyle = .medium
         return formatter
     }()
+}
+
+struct MapViewWrapper: UIViewRepresentable {
+    @Binding var region: MKCoordinateRegion
+    var route: MKRoute?
+    var activityCoordinate: CLLocationCoordinate2D
+    var userCoordinate: CLLocationCoordinate2D?
+
+    func makeUIView(context: Context) -> MKMapView {
+        let mapView = MKMapView()
+        mapView.delegate = context.coordinator
+        mapView.setRegion(region, animated: true)
+        mapView.showsUserLocation = true
+
+        let activityAnnotation = MKPointAnnotation()
+        activityAnnotation.coordinate = activityCoordinate
+        activityAnnotation.title = "Activity Location"
+        mapView.addAnnotation(activityAnnotation)
+
+        return mapView
+    }
+
+    func updateUIView(_ uiView: MKMapView, context: Context) {
+        uiView.setRegion(region, animated: true)
+
+        uiView.removeOverlays(uiView.overlays)
+
+        if let polyline = route?.polyline {
+            uiView.addOverlay(polyline)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    class Coordinator: NSObject, MKMapViewDelegate {
+        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let polyline = overlay as? MKPolyline {
+                let renderer = MKPolylineRenderer(polyline: polyline)
+                renderer.strokeColor = .blue
+                renderer.lineWidth = 4
+                return renderer
+            }
+            return MKOverlayRenderer()
+        }
+    }
 }

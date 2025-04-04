@@ -87,6 +87,7 @@ struct ActivityMapDetailView: View {
                         selectedTransportOption: $selectedTransportOption,
                         dateFormatter: dateFormatter
                     )
+                    .padding(.horizontal)
                 }
             }
         }

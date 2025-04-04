@@ -109,7 +109,6 @@ struct ActivityMapDetailView: View {
                     .padding()
                     .background(.ultraThinMaterial)
                     .cornerRadius(20)
-                    .padding()
                 }
             }
         }

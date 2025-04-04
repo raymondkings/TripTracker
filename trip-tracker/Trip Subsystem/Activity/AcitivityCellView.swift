@@ -22,7 +22,7 @@ struct ActivityCellView: View {
                 ZStack {
                     Rectangle()
                         .fill(colorForType(activity.type).opacity(0.15))
-                        .frame(width: 60)
+                        .frame(width: 80)
                         .cornerRadius(12, corners: [.topLeft, .bottomLeft])
                     VStack {
                         Image(systemName: iconForType(activity.type))
@@ -34,9 +34,7 @@ struct ActivityCellView: View {
                                 .font(.caption2)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color.blue.opacity(0.2))
-                                .foregroundColor(.blue)
-                                .clipShape(Capsule())
+                                .foregroundColor(.orange)
                         }
                     }
                 }

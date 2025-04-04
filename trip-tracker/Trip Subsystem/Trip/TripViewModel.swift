@@ -56,6 +56,7 @@ import os
         startDate: Date,
         endDate: Date,
         imageUrl: URL?,
+        localImageFilename: String?,
         activities: [Activity] = [],
         isAIGenerated: Bool = false
     ) {
@@ -66,6 +67,7 @@ import os
             endDate: endDate,
             country: country,
             imageUrl: imageUrl,
+            localImageFilename: localImageFilename,
             mock: false,
             aiGenerated: isAIGenerated,
             activities: activities

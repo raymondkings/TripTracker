@@ -110,9 +110,12 @@ struct TripCardView: View {
     }
 
     var imageGroup: some View {
-        if trip.mock == true && imageUrl == nil {
+        if let localImageFilename = trip.localImageFilename {
+            let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent(localImageFilename)
+
             return AnyView(
-                Image("Rome")
+                Image(uiImage: UIImage(contentsOfFile: localURL.path) ?? UIImage())
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(height: 150)
@@ -130,6 +133,14 @@ struct TripCardView: View {
                     Color.gray
                         .frame(height: 150)
                 }
+            )
+        } else if trip.mock == true {
+            return AnyView(
+                Image("Rome")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 150)
+                    .clipped()
             )
         } else {
             return AnyView(

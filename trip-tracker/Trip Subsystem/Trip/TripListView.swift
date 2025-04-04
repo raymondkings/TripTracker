@@ -34,7 +34,8 @@ struct TripListView: View {
             }
             .sheet(isPresented: $isShowingGenerateTripWithAI, content: {
                 GenerateTripWithAI(
-                    tripViewModel : viewModel
+                    tripViewModel : viewModel,
+                    isShowingGenerateTripWithAI: isShowingGenerateTripWithAI
                 )
             })
             .fileImporter(

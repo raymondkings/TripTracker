@@ -9,6 +9,7 @@ import SwiftUI
 struct GenerateTripWithAI: View {
     @State private var createTripViewModel = CreateTripViewModel()
     @Bindable var tripViewModel: TripViewModel
+    @State var isShowingGenerateTripWithAI: Bool
     @State private var cities: String = ""
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
@@ -198,8 +199,7 @@ struct GenerateTripWithAI: View {
         - type: Enum (activity, accommodation, restaurant)
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
 
-        The Location of an Activity has to be an exact location since it is an input for Map.
-        Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. Also consider the Date. The activities that you return will be sorted by the time and the Date, so for example, having Breakfast after Dinner does not make sense. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        The location name should match the name of the place, the exact address is not needed. Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. Also consider the Date. The activities that you return will be sorted by the time and the Date, so for example, having Breakfast after Dinner does not make sense. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -269,6 +269,7 @@ struct GenerateTripWithAI: View {
                 self.isSubmitting = false
             }
         }.resume()
+        self.isShowingGenerateTripWithAI = false
     }
 
 

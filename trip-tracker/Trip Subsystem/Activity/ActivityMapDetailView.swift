@@ -188,6 +188,22 @@ struct TripDetailsCard: View {
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
+            
+            Button(action: {
+                let escapedQuery = activity.location.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                if let url = URL(string: "http://maps.apple.com/?q=\(escapedQuery)") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
+                HStack {
+                    Image(systemName: "map")
+                    Text("Open in Apple Maps")
+                        .fontWeight(.semibold)
+                }
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .cornerRadius(12)
+            }
         }
         .padding()
         .background(.ultraThinMaterial)

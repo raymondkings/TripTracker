@@ -5,11 +5,12 @@
 //  Created by Raymond King on 28.03.25.
 
 import SwiftUI
+import AlertToast
 
 struct GenerateTripWithAI: View {
     @State private var createTripViewModel = CreateTripViewModel()
     @Bindable var tripViewModel: TripViewModel
-    @State var isShowingGenerateTripWithAI: Bool
+    @Binding var isShowingGenerateTripWithAI: Bool
     @State private var cities: String = ""
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
@@ -26,6 +27,10 @@ struct GenerateTripWithAI: View {
     @State private var generatedJSON: String = ""
     @State private var selectedImage: UIImage?
     @State private var isShowingImagePicker = false
+    
+    @State private var showSuccessToast = false
+    @State private var showErrorToast = false
+
 
     var body: some View {
         NavigationView {
@@ -132,18 +137,14 @@ struct GenerateTripWithAI: View {
                     }
                     .disabled(isSubmitting || createTripViewModel.searchText.isEmpty || !createTripViewModel.isValidCountry)
                 }
-
-                if !generatedJSON.isEmpty {
-                    Section(header: Text("Generated Trip JSON")) {
-                        ScrollView {
-                            Text(generatedJSON)
-                                .font(.system(.footnote, design: .monospaced))
-                                .padding()
-                        }
-                    }
-                }
             }
             .navigationTitle("Generate Trip with AI ✨")
+            .toast(isPresenting: $showSuccessToast, duration: 2.0) {
+                AlertToast(type: .complete(Color.green), title: "Trip Saved!")
+            }
+            .toast(isPresenting: $showErrorToast, duration: 2.0) {
+                AlertToast(type: .error(Color.red), title: "Failed to generate trip")
+            }
         }
     }
 
@@ -232,7 +233,7 @@ struct GenerateTripWithAI: View {
         - type: Enum (activity, accommodation, restaurant)
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
 
-        The location name should match the name of the place, the exact address is not needed. Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. Also consider the Date. The activities that you return will be sorted by the time and the Date, so for example, having Breakfast after Dinner does not make sense. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        The location name should match the name of the place, the exact address is not needed. Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. Also consider the Date and Time. The activities that you return will be sorted by the Time and the Date, so for example, having Breakfast after Dinner in the same day does not make sense. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -258,7 +259,7 @@ struct GenerateTripWithAI: View {
             return
         }
 
-        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+        URLSession.shared.dataTask(with: urlRequest) { data, _ , error in
             DispatchQueue.main.async {
                 if let data = data {
                     print("Raw Gemini response:\n", String(data: data, encoding: .utf8) ?? "N/A")
@@ -286,27 +287,34 @@ struct GenerateTripWithAI: View {
                                 
                                 decodedTrip.localImageFilename = localImageFilename
                                 self.tripViewModel.addAIGeneratedTrip(decodedTrip)
-                                self.generatedJSON = "Trip added successfully 🎉"
+                                isShowingGenerateTripWithAI = false
+                                self.showSuccessToast = true
                             } catch {
                                 print("Decoding error:", error)
+                                isShowingGenerateTripWithAI = false
+                                self.showErrorToast = true
                                 self.generatedJSON = "{ \"error\": \"Failed to decode AI trip: \(error.localizedDescription)\" }"
                             }
                         } else {
+                            isShowingGenerateTripWithAI = false
+                            self.showErrorToast = true
                             self.generatedJSON = "{ \"error\": \"Failed to convert Gemini response to data.\" }"
                         }
                     } else if let jsonError = try? JSONSerialization.jsonObject(with: data, options: []) {
                         print("Unexpected JSON structure:\n\(jsonError)")
+                        isShowingGenerateTripWithAI = false
+                        self.showErrorToast = true
                         self.generatedJSON = "{ \"error\": \"Unexpected Gemini response format.\" }"
                     } else {
+                        isShowingGenerateTripWithAI = false
+                        self.showErrorToast = true
                         self.generatedJSON = "{ \"error\": \"Failed to decode Gemini response.\" }"
                     }
                 }
-
                 self.isSubmitting = false
             }
         }
         .resume()
-        self.isShowingGenerateTripWithAI = false
     }
 
 

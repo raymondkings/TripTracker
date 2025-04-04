@@ -83,6 +83,12 @@ struct ActivityListView: View {
         .navigationTitle("Activities")
         .navigationBarItems(
             trailing: HStack {
+                NavigationLink(destination: ActivityMapOverviewView(trip: trip)) {
+                    Image(systemName: "map")
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
+                }
+                
                 Button(action: {
                     isShowingDateFilter = true
                 }) {

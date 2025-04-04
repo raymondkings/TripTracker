@@ -58,7 +58,24 @@ struct ActivityMapDetailView: View {
             }
 
             if let _ = activityCoordinate {
-                VStack(spacing: 8) {
+                VStack {
+                    HStack(spacing: 12) {
+                        if let mapView = mapView, let userLocation = locationManager.location {
+                            CircleMapControlButton(systemImage: "location.fill") {
+                                let region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                                mapView.setRegion(region, animated: true)
+                            }
+                        }
+
+                        if let mapView = mapView, let activityCoord = activityCoordinate {
+                            CircleMapControlButton(systemImage: "mappin.and.ellipse") {
+                                let region = MKCoordinateRegion(center: activityCoord, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                                mapView.setRegion(region, animated: true)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing)
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(activity.name)
@@ -91,38 +108,7 @@ struct ActivityMapDetailView: View {
                     .background(.ultraThinMaterial)
                     .cornerRadius(20)
                 }
-                .padding()
             }
-
-            VStack(spacing: 12) {
-                if let mapView = mapView, let userLocation = locationManager.location {
-                    Button(action: {
-                        let region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-                        mapView.setRegion(region, animated: true)
-                    }) {
-                        Label("Center on Me", systemImage: "location.fill")
-                            .padding(8)
-                            .background(Color.white)
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
-                    }
-                }
-
-                if let mapView = mapView, let activityCoord = activityCoordinate {
-                    Button(action: {
-                        let region = MKCoordinateRegion(center: activityCoord, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-                        mapView.setRegion(region, animated: true)
-                    }) {
-                        Label("Center on Activity", systemImage: "mappin.and.ellipse")
-                            .padding(8)
-                            .background(Color.white)
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
-                    }
-                }
-            }
-            .padding(.trailing)
-            .padding(.bottom, 140)
         }
         .navigationTitle("Activity Map")
         .navigationBarTitleDisplayMode(.inline)
@@ -189,6 +175,22 @@ struct ActivityMapDetailView: View {
         formatter.dateStyle = .medium
         return formatter
     }()
+}
+
+struct CircleMapControlButton: View {
+    var systemImage: String
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .imageScale(.medium)
+                .padding(10)
+                .background(.ultraThinMaterial)
+                .clipShape(Circle())
+                .shadow(radius: 2)
+        }
+    }
 }
 
 struct MapViewWrapper: UIViewRepresentable {

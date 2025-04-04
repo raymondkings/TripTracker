@@ -4,7 +4,6 @@
 //
 //  Created by Raymond King on 29.03.25.
 //
-
 import SwiftUI
 import MapKit
 import CoreLocation
@@ -35,6 +34,7 @@ struct ActivityMapDetailView: View {
     @State private var activityCoordinate: CLLocationCoordinate2D?
     @State private var travelTimes: [TransportOption: TimeInterval] = [:]
     @State private var route: MKRoute?
+    @State private var mapView: MKMapView? = nil
 
     let transportOptions: [TransportOption] = [
         TransportOption(label: "Driving", systemImage: "car.fill", rawType: MKDirectionsTransportType.automobile.rawValue),
@@ -42,10 +42,15 @@ struct ActivityMapDetailView: View {
     ]
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomTrailing) {
             if let activityCoordinate {
-                MapViewWrapper(region: $region, route: route, activityCoordinate: activityCoordinate, userCoordinate: locationManager.location)
-                    .ignoresSafeArea()
+                MapViewWrapper(
+                    route: route,
+                    activityCoordinate: activityCoordinate,
+                    userCoordinate: locationManager.location,
+                    mapView: $mapView
+                )
+                .ignoresSafeArea()
             } else {
                 ProgressView("Loading map...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -92,6 +97,36 @@ struct ActivityMapDetailView: View {
                 }
                 .padding()
             }
+
+            VStack(spacing: 12) {
+                if let mapView = mapView, let userLocation = locationManager.location {
+                    Button(action: {
+                        let region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                        mapView.setRegion(region, animated: true)
+                    }) {
+                        Label("Center on Me", systemImage: "location.fill")
+                            .padding(8)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .shadow(radius: 2)
+                    }
+                }
+
+                if let mapView = mapView, let activityCoord = activityCoordinate {
+                    Button(action: {
+                        let region = MKCoordinateRegion(center: activityCoord, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                        mapView.setRegion(region, animated: true)
+                    }) {
+                        Label("Center on Activity", systemImage: "mappin.and.ellipse")
+                            .padding(8)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .shadow(radius: 2)
+                    }
+                }
+            }
+            .padding(.trailing)
+            .padding(.bottom, 140)
         }
         .navigationTitle("Activity Map")
         .navigationBarTitleDisplayMode(.inline)
@@ -122,11 +157,6 @@ struct ActivityMapDetailView: View {
 
     private func setUpMapAndRoutes(with coordinate: CLLocationCoordinate2D) {
         self.activityCoordinate = coordinate
-
-        region = MKCoordinateRegion(
-            center: coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-        )
 
         guard let userCoord = locationManager.location else {
             print("User location not available yet")
@@ -166,28 +196,29 @@ struct ActivityMapDetailView: View {
 }
 
 struct MapViewWrapper: UIViewRepresentable {
-    @Binding var region: MKCoordinateRegion
     var route: MKRoute?
     var activityCoordinate: CLLocationCoordinate2D
     var userCoordinate: CLLocationCoordinate2D?
+    @Binding var mapView: MKMapView?
 
     func makeUIView(context: Context) -> MKMapView {
-        let mapView = MKMapView()
-        mapView.delegate = context.coordinator
-        mapView.setRegion(region, animated: true)
-        mapView.showsUserLocation = true
+        let map = MKMapView()
+        map.delegate = context.coordinator
+        map.showsUserLocation = true
 
         let activityAnnotation = MKPointAnnotation()
         activityAnnotation.coordinate = activityCoordinate
         activityAnnotation.title = "Activity Location"
-        mapView.addAnnotation(activityAnnotation)
+        map.addAnnotation(activityAnnotation)
 
-        return mapView
+        DispatchQueue.main.async {
+            self.mapView = map
+        }
+
+        return map
     }
 
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        uiView.setRegion(region, animated: true)
-
         uiView.removeOverlays(uiView.overlays)
 
         if let polyline = route?.polyline {

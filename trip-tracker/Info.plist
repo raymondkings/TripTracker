@@ -6,5 +6,7 @@
 	<array>
 		<string>Onest-Bold.ttf</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>We use your location to calculate routes to your activity.</string>
 </dict>
 </plist>

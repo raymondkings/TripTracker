@@ -19,6 +19,7 @@ struct ActivityCellView: View {
             .hidden()
 
             HStack(spacing: 0) {
+                // Left color block
                 ZStack {
                     Rectangle()
                         .fill(colorForType(activity.type).opacity(0.15))
@@ -39,7 +40,7 @@ struct ActivityCellView: View {
                     }
                 }
 
-                // Right content section
+                // Right content
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -58,7 +59,6 @@ struct ActivityCellView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
-                        .contentShape(Rectangle())
 
                         if isExpanded {
                             VStack(alignment: .leading, spacing: 6) {
@@ -79,9 +79,13 @@ struct ActivityCellView: View {
                     Spacer()
                 }
                 .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12, corners: [.topRight, .bottomRight])
             }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            )
+            .padding(.vertical, 4)
             .onTapGesture {
                 isActive = true
             }

@@ -194,7 +194,7 @@ struct GenerateTripWithAI: View {
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
 
         The Location of an Activity has to be an exact location since it is an input for Map.
-        Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast.   Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -230,7 +230,6 @@ struct GenerateTripWithAI: View {
                        let content = candidates.first?["content"] as? [String: Any],
                        let parts = content["parts"] as? [[String: Any]],
                        let text = parts.first?["text"] as? String {
-
                         print("Gemini parsed text:\n\(text)")
                         let cleanText = text
                             .replacingOccurrences(of: "```json", with: "")

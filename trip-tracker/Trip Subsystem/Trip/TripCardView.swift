@@ -166,8 +166,10 @@ struct TripCardView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(trip.name)
                 .font(Font.custom("Onest-Bold", size: 18))
-                .foregroundColor(Color.primary)
+                .foregroundColor(.primary)
                 .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack {
                 Image(systemName: "location.fill")

@@ -98,9 +98,14 @@ struct GenerateTripWithAI: View {
                 Section {
                     Button(action: generateTripWithAI) {
                         if isSubmitting {
-                            ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                        } else {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                    Text("Generating Trip")
+                                        .fontWeight(.semibold)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            } else {
                             Text("Generate Trip")
                                 .frame(maxWidth: .infinity)
                         }

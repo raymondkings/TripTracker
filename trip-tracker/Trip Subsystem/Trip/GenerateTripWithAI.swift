@@ -24,6 +24,8 @@ struct GenerateTripWithAI: View {
 
     @State private var isSubmitting = false
     @State private var generatedJSON: String = ""
+    @State private var selectedImage: UIImage?
+    @State private var isShowingImagePicker = false
 
     var body: some View {
         NavigationView {
@@ -95,6 +97,23 @@ struct GenerateTripWithAI: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                 }
+                
+                if let image = selectedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 180)
+                        .clipped()
+                        .cornerRadius(12)
+                        .padding()
+                }
+
+                Button("Choose Cover Image") {
+                    isShowingImagePicker = true
+                }
+                .sheet(isPresented: $isShowingImagePicker) {
+                    ImagePicker(selectedImage: $selectedImage)
+                }
 
                 Section {
                     Button(action: generateTripWithAI) {
@@ -149,6 +168,20 @@ struct GenerateTripWithAI: View {
                 }
             }
             .padding(.vertical, 4)
+        }
+    }
+    
+    private func saveImageLocally(_ image: UIImage) -> String? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        let filename = UUID().uuidString + ".jpg"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(filename)
+        do {
+            try data.write(to: url)
+            return filename
+        } catch {
+            print("Failed to save image locally:", error)
+            return nil
         }
     }
 
@@ -249,6 +282,9 @@ struct GenerateTripWithAI: View {
                                 decodedTrip.id = UUID()
                                 decodedTrip.aiGenerated = true
                                 decodedTrip.mock = true
+                                let localImageFilename = selectedImage.flatMap { saveImageLocally($0) }
+                                
+                                decodedTrip.localImageFilename = localImageFilename
                                 self.tripViewModel.addAIGeneratedTrip(decodedTrip)
                                 self.generatedJSON = "Trip added successfully 🎉"
                             } catch {
@@ -268,10 +304,10 @@ struct GenerateTripWithAI: View {
 
                 self.isSubmitting = false
             }
-        }.resume()
+        }
+        .resume()
         self.isShowingGenerateTripWithAI = false
     }
-
 
 
     private func iso8601Date(from date: Date) -> String {

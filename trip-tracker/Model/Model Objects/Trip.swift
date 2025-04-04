@@ -34,7 +34,7 @@ public struct Trip: Identifiable, Codable {
     public var endDate: Date
     public var country: String
     public var imageUrl: URL?
-    public var localImageFilename: String? // ✅ Add this line
+    public var localImageFilename: String? = nil
     public var mock: Bool = false
     public var aiGenerated: Bool = false
     public var activities: [Activity] = []

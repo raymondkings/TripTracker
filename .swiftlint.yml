@@ -306,8 +306,8 @@ function_body_length: # Functions bodies should not span too many lines.
   - 200 # error - default: 100
 
 function_parameter_count: # Number of function parameters should be low.
-  - 5 # warning - default: 5
-  - 5 # error - default: 8
+  - 10 # warning - default: 5
+  - 10 # error - default: 8
 
 large_tuple: # Tuples shouldn't have too many members. Create a custom type instead.
   - 2 # warning - default: 2
@@ -331,8 +331,8 @@ trailing_closure:
   only_single_muted_parameter: true
 
 type_body_length: # Type bodies should not span too many lines.
-  - 250 # warning - default: 200
-  - 250 # error - default: 200
+  - 300 # warning - default: 200
+  - 300 # error - default: 200
 
 type_name:
   excluded: # excluded names

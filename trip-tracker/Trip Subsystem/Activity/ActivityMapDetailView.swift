@@ -59,10 +59,6 @@ struct ActivityMapDetailView: View {
 
             if let _ = activityCoordinate {
                 VStack(spacing: 8) {
-                    Capsule()
-                        .frame(width: 40, height: 5)
-                        .foregroundColor(.gray.opacity(0.5))
-                        .padding(.top, 8)
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(activity.name)

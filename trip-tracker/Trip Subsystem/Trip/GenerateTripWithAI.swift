@@ -31,6 +31,10 @@ struct GenerateTripWithAI: View {
     @State private var showSuccessToast = false
     @State private var showErrorToast = false
 
+    /// Limit the usage for generating trip with AI
+    @State private var dailyGenerationCount = 0
+    private let dailyLimit = 3
+
 
     var body: some View {
         NavigationView {
@@ -146,6 +150,29 @@ struct GenerateTripWithAI: View {
                 AlertToast(type: .error(Color.red), title: "Failed to generate trip")
             }
         }
+        .onAppear {
+            loadGenerationLimit()
+        }
+    }
+    
+    private func loadGenerationLimit() {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+
+        if let savedDate = defaults.object(forKey: "lastGenerationDate") as? Date,
+           Calendar.current.isDate(savedDate, inSameDayAs: today) {
+            dailyGenerationCount = defaults.integer(forKey: "generationCount")
+        } else {
+            // New day
+            defaults.set(today, forKey: "lastGenerationDate")
+            defaults.set(0, forKey: "generationCount")
+            dailyGenerationCount = 0
+        }
+    }
+    
+    private func incrementGenerationCount() {
+        dailyGenerationCount += 1
+        UserDefaults.standard.set(dailyGenerationCount, forKey: "generationCount")
     }
 
     private func multiSelectChips<T: Hashable & Identifiable & RawRepresentable>(options: [T], selected: Binding<Set<T>>) -> some View where T.RawValue == String {
@@ -298,6 +325,7 @@ struct GenerateTripWithAI: View {
                                 self.tripViewModel.addAIGeneratedTrip(decodedTrip)
                                 isShowingGenerateTripWithAI = false
                                 self.showSuccessToast = true
+                                incrementGenerationCount()
                             } catch {
                                 print("Decoding error:", error)
                                 isShowingGenerateTripWithAI = false

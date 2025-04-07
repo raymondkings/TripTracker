@@ -18,6 +18,12 @@ struct TripListView: View {
     @State private var importErrorMessage: String?
     @State private var showErrorToast = false
 
+    /// Limit the usage for generating trip with AI
+    @State private var dailyGenerationCount = 0
+    @State private var lastGenerationDate: Date?
+    let dailyLimit = 3
+
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -51,6 +57,9 @@ struct TripListView: View {
             .toast(isPresenting: $showErrorToast, duration: 2.0) {
                 AlertToast(type: .error(Color.red), title: importErrorMessage ?? "Failed to import trip")
             }
+        }
+        .onAppear {
+            loadGenerationLimit()
         }
     }
 
@@ -86,7 +95,9 @@ struct TripListView: View {
 
                 Button("Generate Trip with AI ✨") {
                     isShowingGenerateTripWithAI = true
+                    incrementGenerationCount()
                 }
+                .disabled(dailyGenerationCount >= dailyLimit)
 
                 Button("Import Trip") {
                     isShowingFileImporter = true
@@ -98,6 +109,29 @@ struct TripListView: View {
             }
         }
     }
+    
+    private func loadGenerationLimit() {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+
+        if let savedDate = defaults.object(forKey: "lastGenerationDate") as? Date,
+           Calendar.current.isDate(savedDate, inSameDayAs: today) {
+            dailyGenerationCount = defaults.integer(forKey: "generationCount")
+        } else {
+            // New day
+            defaults.set(today, forKey: "lastGenerationDate")
+            defaults.set(0, forKey: "generationCount")
+            dailyGenerationCount = 0
+        }
+
+        lastGenerationDate = today
+    }
+
+    private func incrementGenerationCount() {
+        dailyGenerationCount += 1
+        UserDefaults.standard.set(dailyGenerationCount, forKey: "generationCount")
+    }
+
 
     private func handleTripImport(result: Result<[URL], Error>) {
         switch result {

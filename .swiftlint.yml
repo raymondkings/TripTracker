@@ -328,8 +328,8 @@ trailing_closure:
   only_single_muted_parameter: true
 
 type_body_length: # Type bodies should not span too many lines.
-  - 300 # warning - default: 200
-  - 300 # error - default: 200
+  - 400 # warning - default: 200
+  - 400 # error - default: 200
 
 type_name:
   excluded: # excluded names

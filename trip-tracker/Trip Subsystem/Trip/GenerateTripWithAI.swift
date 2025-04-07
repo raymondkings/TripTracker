@@ -233,7 +233,17 @@ struct GenerateTripWithAI: View {
         - type: Enum (activity, accommodation, restaurant)
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
 
-        The location name should match the name of the place, the exact address is not needed. Append the city name behind the location name. Also give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. Also consider the Date and Time. The activities that you return will be sorted by the Time and the Date, so for example, having Breakfast after Dinner in the same day does not make sense. The Meal order has to be correct! Breakfast first, then Lunch, then Dinner.  Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
+        Consider all the following points : 
+        
+        - The location name should match the name of the place, the exact address is not needed. Append the city name behind the location name. 
+        
+        - Give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. 
+        
+        - One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. 
+        
+        - Consider the Date and Time. The activities that you return will be sorted by the Time and the Date, so for example, having Breakfast after Dinner in the same day does not make sense. The Meal order has to be correct! Breakfast first, then Lunch, then Dinner.  
+        
+        Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -258,8 +268,7 @@ struct GenerateTripWithAI: View {
             isSubmitting = false
             return
         }
-
-        URLSession.shared.dataTask(with: urlRequest) { data, _ , error in
+        URLSession.shared.dataTask(with: urlRequest) { data, _, error in
             DispatchQueue.main.async {
                 if let data = data {
                     print("Raw Gemini response:\n", String(data: data, encoding: .utf8) ?? "N/A")

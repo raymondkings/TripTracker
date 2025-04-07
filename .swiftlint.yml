@@ -238,9 +238,6 @@ only_rules:
     # Files should have a single trailing newline.
   - trailing_semicolon
     # Lines should not have trailing semicolons.
-  - trailing_whitespace
-    # Lines should not have trailing whitespace.
-    # Ignored lines are specified below.
   - type_body_length
     # Type bodies should not span too many lines.
     # See large_tuple below for the exact configuration.

@@ -23,7 +23,7 @@ import os
             loadTrips()
         } else {
             logger.debug("No saved file found, adding mock data.")
-            loadMockData()
+            // loadMockData()
             saveTrips()
         }
     }
@@ -46,7 +46,7 @@ import os
             aiGenerated: false,
             activities: [mockActivity1, mockActivity2]
         )
-        trips.append(mockTrip)
+        // trips.append(mockTrip)
         logger.info("Mock trip \(mockTrip.name) added.")
     }
 
@@ -120,7 +120,7 @@ import os
             logger.info("Trips loaded.")
         } catch {
             logger.warning("Failed to load trips. Resetting to mock data. Error: \(error.localizedDescription)")
-            loadMockData()
+            // loadMockData()
             saveTrips()
         }
     }

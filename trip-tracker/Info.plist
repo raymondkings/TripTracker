@@ -8,5 +8,7 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>We use your location to calculate routes to your activity.</string>
+    <key>UILaunchStoryboardName</key>
+    <string>Launch Screen</string>
 </dict>
 </plist>

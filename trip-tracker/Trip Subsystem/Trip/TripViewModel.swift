@@ -152,13 +152,4 @@ import os
             logger.error("Failed to find trip \(trip.name) or activity \(activity.name) for editing.")
         }
     }
-    
-    func updateTripActivities(_ newActivities: [Activity], for trip: Trip) {
-        if let index = trips.firstIndex(where: { $0.id == trip.id }) {
-            trips[index].activities = newActivities
-            logger.debug("Trip activities updated for trip \(trip.name).")
-        } else {
-            logger.error("Failed to find trip \(trip.name) to update activities.")
-        }
-    }
 }

@@ -4,27 +4,28 @@
 //
 //  Created by Raymond King on 12.10.24.
 //
+
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct ActivityListView: View {
     @Bindable var viewModel: TripViewModel
     var trip: Trip
-
-    @State private var flatActivities: [Activity] = []
     @State private var isShowingCreateActivity = false
     @State private var activityToEdit: Activity?
+
     @State private var searchText: String = ""
     @State private var isShowingDateFilter = false
     @State private var selectedDate: Date?
+
     @State private var isShowingDeleteConfirmation = false
     @State private var activityToDelete: Activity?
-
+    
     enum ActivityCategory: String, CaseIterable, Hashable {
         case activity = "🥳 Activities"
         case accommodation = "🏠 Accommodations"
         case restaurant = "🍴 Restaurants"
     }
+    
     @State private var selectedCategories: Set<ActivityCategory> = []
 
     var body: some View {
@@ -32,61 +33,48 @@ struct ActivityListView: View {
             categoryChips
 
             List {
-                ForEach(groupedActivities, id: \.date) { section in
-                    Section(header: Text(formattedDate(section.date))) {
-                        ForEach(section.activities) { activity in
-                            activityCell(for: activity)
-                                .onDrag {
-                                    NSItemProvider(object: activity.id.uuidString as NSString)
-                                }
-                                .onDrop(of: [UTType.plainText.identifier], delegate: ActivityDropDelegate(
-                                    targetActivity: activity,
-                                    activities: $flatActivities,
-                                    trip: trip,
-                                    viewModel: viewModel
-                                )
-                                )
-                        }
-                    }
-                    .onDrop(of: [UTType.plainText.identifier], delegate: SectionDropDelegate(
-                        sectionDate: section.date,
-                        activities: $flatActivities,
-                        trip: trip,
-                        viewModel: viewModel
-                    ))
-                }
+                activitySections()
+                    .listRowSeparator(.hidden)
             }
             .listStyle(PlainListStyle())
             .scrollContentBackground(.hidden)
             .environment(\.defaultMinListRowHeight, 0)
         }
         .navigationTitle("Activities")
-        .navigationBarItems(trailing: HStack {
-            NavigationLink(destination: ActivityMapOverviewView(trip: trip)) {
-                Image(systemName: "map")
-                    .imageScale(.large)
-                    .frame(width: 44, height: 44)
+        .navigationBarItems(
+            trailing: HStack {
+                NavigationLink(destination: ActivityMapOverviewView(trip: trip)) {
+                    Image(systemName: "map")
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
+                }
+                
+                Button(action: {
+                    isShowingDateFilter = true
+                }) {
+                    Image(systemName: "calendar")
+                        .foregroundColor(selectedDate != nil ? .green : .blue)
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
+                }
+
+                Button(action: {
+                    activityToEdit = nil
+                    isShowingCreateActivity = true
+                }) {
+                    Image(systemName: "plus")
+                        .imageScale(.large)
+                        .frame(width: 44, height: 44)
+                }
             }
-            Button {
-                isShowingDateFilter = true
-            } label: {
-                Image(systemName: "calendar")
-                    .foregroundColor(selectedDate != nil ? .green : .blue)
-                    .imageScale(.large)
-                    .frame(width: 44, height: 44)
-            }
-            Button {
-                activityToEdit = nil
-                isShowingCreateActivity = true
-            } label: {
-                Image(systemName: "plus")
-                    .imageScale(.large)
-                    .frame(width: 44, height: 44)
-            }
-        })
+        )
         .searchable(text: $searchText, prompt: "Search activities")
         .sheet(isPresented: $isShowingCreateActivity) {
-            CreateEditActivity(viewModel: viewModel, trip: trip, activityToEdit: activityToEdit)
+            CreateEditActivity(
+                viewModel: viewModel,
+                trip: trip,
+                activityToEdit: activityToEdit
+            )
         }
         .onChange(of: activityToEdit) { _, newValue in
             if newValue != nil {
@@ -108,23 +96,44 @@ struct ActivityListView: View {
                 secondaryButton: .cancel()
             )
         }
-        .onAppear {
-            flatActivities = trip.activities
-        }
     }
 
-    private var groupedActivities: [(date: Date, activities: [Activity])] {
-        let filtered = flatActivities.filter { activity in
-            (searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)) &&
-            (selectedCategories.isEmpty || selectedCategories.contains(ActivityCategory(rawValue: activity.type.rawValue) ?? .activity)) &&
-            (selectedDate == nil || Calendar.current.isDate(activity.date, inSameDayAs: selectedDate!))
+    // MARK: - Filter Logic
+
+    private func filteredActivitiesByDate() -> [(key: Date, value: [Activity])] {
+        let activities = trip.activities
+
+        let filteredBySearch = activities.filter { activity in
+            searchText.isEmpty || activity.name.localizedCaseInsensitiveContains(searchText)
         }
 
-        let grouped = Dictionary(grouping: filtered) {
-            Calendar.current.startOfDay(for: $0.date)
+        let filteredByCategory: [Activity]
+        if selectedCategories.isEmpty {
+            filteredByCategory = filteredBySearch
+        } else {
+            filteredByCategory = filteredBySearch.filter { activity in
+                switch activity.type {
+                case .activity: return selectedCategories.contains(.activity)
+                case .accommodation: return selectedCategories.contains(.accommodation)
+                case .restaurant: return selectedCategories.contains(.restaurant)
+                }
+            }
         }
 
-        return grouped.map { (date: $0.key, activities: $0.value) }.sorted { $0.date < $1.date }
+        let filteredByDate: [Activity]
+        if let selectedDate = selectedDate {
+            filteredByDate = filteredByCategory.filter { activity in
+                Calendar.current.isDate(activity.date, inSameDayAs: selectedDate)
+            }
+        } else {
+            filteredByDate = filteredByCategory
+        }
+
+        let grouped = Dictionary(grouping: filteredByDate) { activity in
+            Calendar.current.startOfDay(for: activity.date)
+        }
+
+        return grouped.sorted { $0.key < $1.key }
     }
 
     private func formattedDate(_ date: Date) -> String {
@@ -133,6 +142,22 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
 
+    // MARK: - Section Builder
+
+    @ViewBuilder
+    private func activitySections() -> some View {
+        ForEach(filteredActivitiesByDate(), id: \.key) { date, activities in
+            Section(header: Text(formattedDate(date))) {
+                ForEach(activities) { activity in
+                    activityCell(for: activity)
+                }
+            }
+        }
+    }
+
+    // MARK: - Cell Builder
+
+    @ViewBuilder
     private func activityCell(for activity: Activity) -> some View {
         ActivityCellView(activity: activity)
             .listRowInsets(EdgeInsets())
@@ -143,7 +168,8 @@ struct ActivityListView: View {
                 Button("Edit") {
                     activityToEdit = activity
                     isShowingCreateActivity = true
-                }.tint(.blue)
+                }
+                .tint(.blue)
 
                 Button("Delete", role: .destructive) {
                     activityToDelete = activity
@@ -152,11 +178,14 @@ struct ActivityListView: View {
             }
     }
 
+    // MARK: - Chips View
+
     private var categoryChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(ActivityCategory.allCases, id: \.self) { category in
                     let isSelected = selectedCategories.contains(category)
+
                     Text(category.rawValue)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -177,16 +206,23 @@ struct ActivityListView: View {
         }
     }
 
+    // MARK: - Date Filter Sheet
+
+    @ViewBuilder
     private var dateFilterSheet: some View {
         NavigationView {
             VStack {
-                DatePicker("Select Date", selection: Binding(get: {
-                    selectedDate ?? Date()
-                }, set: {
-                    selectedDate = $0
-                }), in: trip.startDate...trip.endDate, displayedComponents: .date)
-                    .datePickerStyle(GraphicalDatePickerStyle())
-                    .padding()
+                DatePicker(
+                    "Select Date",
+                    selection: Binding(
+                        get: { selectedDate ?? Date() },
+                        set: { newDate in selectedDate = newDate }
+                    ),
+                    in: trip.startDate ... trip.endDate,
+                    displayedComponents: .date
+                )
+                .datePickerStyle(GraphicalDatePickerStyle())
+                .padding()
 
                 Button("Clear Filter") {
                     selectedDate = nil
@@ -196,9 +232,11 @@ struct ActivityListView: View {
                 Spacer()
             }
             .navigationBarTitle("Filter by Date", displayMode: .inline)
-            .navigationBarItems(leading: Button("Cancel") {
-                isShowingDateFilter = false
-            })
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    isShowingDateFilter = false
+                }
+            )
         }
     }
 }

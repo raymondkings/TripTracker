@@ -10,5 +10,9 @@
     <string>We use your location to calculate routes to your activity.</string>
     <key>UILaunchStoryboardName</key>
     <string>Launch Screen</string>
+    <key>GEMINI_API_KEY</key>
+    <string>$(GEMINI_API_KEY)</string>
+    <key>UNSPLASH_ACCESS_KEY</key>
+    <string>$(UNSPLASH_ACCESS_KEY)</string>
 </dict>
 </plist>

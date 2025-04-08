@@ -15,6 +15,9 @@ struct CreateEditTrip: View {
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showImageErrorAlert = false
+    @State private var selectedImage: UIImage?
+    @State private var isShowingImagePicker = false
+
     @Binding var showSuccessToast: Bool
 
     var tripToEdit: Trip?
@@ -30,6 +33,23 @@ struct CreateEditTrip: View {
                     tripNameSection()
                     durationSection()
                     countrySection()
+                    
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 180)
+                            .clipped()
+                            .cornerRadius(12)
+                            .padding()
+                    }
+
+                    Button("Choose Cover Image") {
+                        isShowingImagePicker = true
+                    }
+                    .sheet(isPresented: $isShowingImagePicker) {
+                        ImagePicker(selectedImage: $selectedImage)
+                    }
                 }
                 if createTripViewModel.isLoading {
                     ProgressView("Saving trip...")
@@ -147,18 +167,25 @@ struct CreateEditTrip: View {
             }
         }
     }
+    
+    private func saveImageLocally(_ image: UIImage) -> String? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        let filename = UUID().uuidString + ".jpg"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(filename)
+        do {
+            try data.write(to: url)
+            return filename
+        } catch {
+            print("Failed to save image locally:", error)
+            return nil
+        }
+    }
 
-    private func saveTrip() async { // This is a function for both creating a new activity and editing an existing one
+    private func saveTrip() async {
         createTripViewModel.isLoading = true
 
-        if !isEditing || (tripToEdit != nil && tripToEdit?.country != createTripViewModel.searchText) {
-            do {
-                try await imageViewModel.searchSinglePhoto(forCountry: createTripViewModel.searchText)
-            } catch {
-                showImageErrorAlert = true
-                imageViewModel.imageUrl = nil
-            }
-        }
+        let localImageFilename = selectedImage.flatMap { saveImageLocally($0) }
 
         if let tripToEdit = tripToEdit {
             let updatedTrip = Trip(
@@ -167,33 +194,39 @@ struct CreateEditTrip: View {
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,
                 country: createTripViewModel.searchText,
-                imageUrl: imageViewModel.imageUrl ?? tripToEdit.imageUrl,
-                mock: tripToEdit.mock
+                imageUrl: nil,
+                localImageFilename: localImageFilename ?? tripToEdit.localImageFilename,
+                mock: tripToEdit.mock,
+                aiGenerated: tripToEdit.aiGenerated,
+                activities: tripToEdit.activities
             )
             viewModel.editTrip(updatedTrip)
-            presentationMode.wrappedValue.dismiss()
         } else {
             let newTrip = Trip(
-                id: UUID(), // generate the UUID of the trip
+                id: UUID(),
                 name: createTripViewModel.tripName,
                 startDate: createTripViewModel.startDate,
                 endDate: createTripViewModel.endDate,
                 country: createTripViewModel.searchText,
-                imageUrl: imageViewModel.imageUrl
+                imageUrl: nil,
+                localImageFilename: localImageFilename
             )
+
             viewModel.addTrip(
                 name: newTrip.name,
                 country: newTrip.country,
                 startDate: newTrip.startDate,
                 endDate: newTrip.endDate,
-                imageUrl: newTrip.imageUrl
+                imageUrl: nil,
+                localImageFilename: localImageFilename
             )
-            presentationMode.wrappedValue.dismiss()
         }
 
         createTripViewModel.isLoading = false
         showSuccessToast = true
+        presentationMode.wrappedValue.dismiss()
     }
+
 
     private func loadTripData(_ trip: Trip) {
         createTripViewModel.tripName = trip.name

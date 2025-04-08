@@ -10,7 +10,7 @@ import SwiftUI
 
 @Observable class ImageViewModel {
     private let logger = Logger(subsystem: "trip-tracker", category: "ImageViewModel")
-    private let accessKey = ConfigTemplate.accessKey
+    private let accessKey = ConfigTemplate.unsplashAccessKey
     var imageUrl: URL?
 
     func searchSinglePhoto(forCountry country: String) async throws {

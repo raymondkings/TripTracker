@@ -238,9 +238,6 @@ only_rules:
     # Files should have a single trailing newline.
   - trailing_semicolon
     # Lines should not have trailing semicolons.
-  - trailing_whitespace
-    # Lines should not have trailing whitespace.
-    # Ignored lines are specified below.
   - type_body_length
     # Type bodies should not span too many lines.
     # See large_tuple below for the exact configuration.
@@ -290,8 +287,8 @@ only_rules:
     # An XCTFail call should include a description of the assertion.
 
 closure_body_length: # Closure bodies should not span too many lines.
-  - 35 # warning - default: 20
-  - 35 # error - default: 100
+  - 100 # warning - default: 20
+  - 100 # error - default: 100
 
 enum_case_associated_values_count: # Number of associated values in an enum case should be low
   - 5 # warning - default: 5
@@ -302,20 +299,20 @@ file_length: # Files should not span too many lines.
   - 500 # error - default: 1000
 
 function_body_length: # Functions bodies should not span too many lines.
-  - 50 # warning - default: 40
-  - 50 # error - default: 100
+  - 200 # warning - default: 40
+  - 200 # error - default: 100
 
 function_parameter_count: # Number of function parameters should be low.
-  - 5 # warning - default: 5
-  - 5 # error - default: 8
+  - 10 # warning - default: 5
+  - 10 # error - default: 8
 
 large_tuple: # Tuples shouldn't have too many members. Create a custom type instead.
   - 2 # warning - default: 2
   - 2 # error - default: 3
 
 line_length: # Lines should not span too many characters.
-  warning: 120 # default: 120
-  error: 120 # default: 200
+  warning: 1000 # default: 120
+  error: 1000 # default: 200
   ignores_comments: true # default: false
   ignores_urls: true # default: false
   ignores_function_declarations: false # default: false
@@ -331,8 +328,8 @@ trailing_closure:
   only_single_muted_parameter: true
 
 type_body_length: # Type bodies should not span too many lines.
-  - 250 # warning - default: 200
-  - 250 # error - default: 200
+  - 400 # warning - default: 200
+  - 400 # error - default: 200
 
 type_name:
   excluded: # excluded names

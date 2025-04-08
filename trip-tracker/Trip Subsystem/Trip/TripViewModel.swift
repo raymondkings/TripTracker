@@ -4,18 +4,37 @@
 //
 //  Created by Raymond King on 09.10.24.
 //
-
 import Foundation
 import os
 
 @Observable class TripViewModel {
     private let logger = Logger(subsystem: "trip-tracker", category: "TripViewModel")
 
-    var trips: [Trip] = []
+    private let savePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("trips.json")
+
+    var trips: [Trip] = [] {
+        didSet {
+            saveTrips()
+        }
+    }
 
     init() {
-        logger.debug("Initializing TripViewModel with mock data.")
-        let mockActivity = ActivityViewModel().mockActivity
+        if fileExistsAtSavePath() {
+            loadTrips()
+        } else {
+            logger.debug("No saved file found, adding mock data.")
+            // loadMockData()
+            saveTrips()
+        }
+    }
+
+    private func fileExistsAtSavePath() -> Bool {
+        FileManager.default.fileExists(atPath: savePath.path)
+    }
+
+    private func loadMockData() {
+        let mockActivity1 = ActivityViewModel().mockActivity1
+        let mockActivity2 = ActivityViewModel().mockActivity2
         let mockTrip = Trip(
             id: UUID(),
             name: "Summer Vacation in Italy",
@@ -24,9 +43,10 @@ import os
             country: "Italy",
             imageUrl: nil,
             mock: true,
-            activities: [mockActivity]
+            aiGenerated: false,
+            activities: [mockActivity1, mockActivity2]
         )
-        trips.append(mockTrip)
+        // trips.append(mockTrip)
         logger.info("Mock trip \(mockTrip.name) added.")
     }
 
@@ -35,7 +55,10 @@ import os
         country: String,
         startDate: Date,
         endDate: Date,
-        imageUrl: URL?
+        imageUrl: URL?,
+        localImageFilename: String?,
+        activities: [Activity] = [],
+        isAIGenerated: Bool = false
     ) {
         let newTrip = Trip(
             id: UUID(),
@@ -44,10 +67,21 @@ import os
             endDate: endDate,
             country: country,
             imageUrl: imageUrl,
-            activities: []
+            localImageFilename: localImageFilename,
+            mock: false,
+            aiGenerated: isAIGenerated,
+            activities: activities
         )
         trips.append(newTrip)
-        logger.info("New trip \(name) added for country \(country).")
+        logger.info("New trip \(name) added for country \(country). AI generated: \(isAIGenerated)")
+    }
+
+    func addAIGeneratedTrip(_ trip: Trip) {
+        var aiTrip = trip
+        aiTrip.mock = false
+        aiTrip.aiGenerated = true
+        trips.append(aiTrip)
+        logger.info("AI-generated trip \(trip.name) added.")
     }
 
     func editTrip(_ updatedTrip: Trip) {
@@ -65,6 +99,29 @@ import os
             logger.info("Trip \(trip.name) deleted.")
         } else {
             logger.error("Failed to delete trip \(trip.name). Trip not found.")
+        }
+    }
+
+    private func saveTrips() {
+        do {
+            let data = try JSONEncoder().encode(trips)
+            try data.write(to: savePath, options: [.atomic, .completeFileProtection])
+            logger.info("Trips saved.")
+        } catch {
+            logger.error("Failed to save trips: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadTrips() {
+        do {
+            let data = try Data(contentsOf: savePath)
+            let decodedTrips = try JSONDecoder().decode([Trip].self, from: data)
+            trips = decodedTrips
+            logger.info("Trips loaded.")
+        } catch {
+            logger.warning("Failed to load trips. Resetting to mock data. Error: \(error.localizedDescription)")
+            // loadMockData()
+            saveTrips()
         }
     }
 

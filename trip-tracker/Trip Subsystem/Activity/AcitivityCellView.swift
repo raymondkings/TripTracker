@@ -3,96 +3,86 @@
 //  trip-tracker
 //
 //  Created by Raymond King on 12.10.24.
-
 import SwiftUI
 
 struct ActivityCellView: View {
     var activity: Activity
-    @State private var isActive = false
+    @Binding var selectedActivity: Activity?
     @State private var isExpanded = false
 
     var body: some View {
-        ZStack {
-            NavigationLink(destination: ActivityMapDetailView(activity: activity), isActive: $isActive) {
-                EmptyView()
-            }
-            .hidden()
-
-            HStack(spacing: 0) {
-                // Left color block
-                ZStack {
-                    Rectangle()
-                        .fill(colorForType(activity.type).opacity(0.15))
-                        .frame(width: 80)
-                        .cornerRadius(12, corners: [.topLeft, .bottomLeft])
-                    VStack {
-                        Image(systemName: iconForType(activity.type))
-                            .foregroundColor(colorForType(activity.type))
-                            .frame(width: 30)
-                            .padding(.trailing, 4)
-                        if let badge = badgeText(for: activity) {
-                            Text(badge)
-                                .font(.caption2)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .foregroundColor(.orange)
-                        }
+        HStack(spacing: 0) {
+            // Left color block
+            ZStack {
+                Rectangle()
+                    .fill(colorForType(activity.type).opacity(0.15))
+                    .frame(width: 80)
+                    .cornerRadius(12, corners: [.topLeft, .bottomLeft])
+                VStack {
+                    Image(systemName: iconForType(activity.type))
+                        .foregroundColor(colorForType(activity.type))
+                        .frame(width: 30)
+                        .padding(.trailing, 4)
+                    if let badge = badgeText(for: activity) {
+                        Text(badge)
+                            .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .foregroundColor(.orange)
                     }
                 }
+            }
 
-                // Right content
-                HStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text(activity.name)
-                                .font(Font.custom("Onest-Bold", size: 18))
-                                .foregroundColor(.primary)
-                                .fixedSize(horizontal: false, vertical: true)
+            // Right content
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(activity.name)
+                            .font(Font.custom("Onest-Bold", size: 18))
+                            .foregroundColor(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                            Spacer()
+                        Spacer()
 
-                            Button(action: {
-                                isExpanded.toggle()
-                            }) {
-                                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                                    .foregroundColor(.gray)
-                            }
-                            .buttonStyle(PlainButtonStyle())
+                        Button(action: {
+                            isExpanded.toggle()
+                        }) {
+                            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                .foregroundColor(.gray)
                         }
-
-                        if isExpanded {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(activity.description)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-
-                                Text(activity.location)
-                                    .font(.footnote)
-                                    .foregroundColor(.secondary)
-                            }
-                            .transition(.opacity)
-                            .animation(.easeInOut(duration: 0.25), value: isExpanded)
-                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .padding(.vertical, 8)
 
-                    Spacer()
+                    if isExpanded {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(activity.description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+
+                            Text(activity.location)
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.25), value: isExpanded)
+                    }
                 }
-                .padding()
+                .padding(.vertical, 8)
+
+                Spacer()
             }
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-            )
-            .padding(.vertical, 4)
-            .onTapGesture {
-                isActive = true
-            }
+            .padding()
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
+        .padding(.vertical, 4)
+        .onTapGesture {
+            selectedActivity = activity
         }
     }
-
-    // MARK: - Helper Styling
 
     private func iconForType(_ type: ActivityType) -> String {
         switch type {
@@ -116,8 +106,6 @@ struct ActivityCellView: View {
         }
         return nil
     }
-
-    // MARK: - Date Formatting
 
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()

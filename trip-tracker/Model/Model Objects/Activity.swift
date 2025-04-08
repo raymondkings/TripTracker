@@ -16,7 +16,7 @@ public enum MealType: String, Codable, CaseIterable {
     case breakfast, lunch, dinner, multiple
 }
 
-public struct Activity: Identifiable, Codable, Equatable {
+public struct Activity: Identifiable, Codable, Equatable, Hashable {
     public var id: UUID
     public var name: String
     public var description: String

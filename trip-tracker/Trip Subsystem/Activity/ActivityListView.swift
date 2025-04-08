@@ -4,14 +4,22 @@
 //
 //  Created by Raymond King on 12.10.24.
 //
+//
+//  ActivityListView.swift
+//  trip-tracker
+//
+//  Created by Raymond King on 12.10.24.
+//
 
 import SwiftUI
 
 struct ActivityListView: View {
     @Bindable var viewModel: TripViewModel
     var trip: Trip
+
     @State private var isShowingCreateActivity = false
     @State private var activityToEdit: Activity?
+    @State private var selectedActivity: Activity? = nil
 
     @State private var searchText: String = ""
     @State private var isShowingDateFilter = false
@@ -19,83 +27,86 @@ struct ActivityListView: View {
 
     @State private var isShowingDeleteConfirmation = false
     @State private var activityToDelete: Activity?
-    
+
     enum ActivityCategory: String, CaseIterable, Hashable {
         case activity = "🥳 Activities"
         case accommodation = "🏠 Accommodations"
         case restaurant = "🍴 Restaurants"
     }
-    
+
     @State private var selectedCategories: Set<ActivityCategory> = []
 
     var body: some View {
-        VStack {
-            categoryChips
+            VStack {
+                categoryChips
 
-            List {
-                activitySections()
-                    .listRowSeparator(.hidden)
-            }
-            .listStyle(PlainListStyle())
-            .scrollContentBackground(.hidden)
-            .environment(\.defaultMinListRowHeight, 0)
-        }
-        .navigationTitle("Activities")
-        .navigationBarItems(
-            trailing: HStack {
-                NavigationLink(destination: ActivityMapOverviewView(trip: trip)) {
-                    Image(systemName: "map")
-                        .imageScale(.large)
-                        .frame(width: 44, height: 44)
+                List {
+                    activitySections()
+                        .listRowSeparator(.hidden)
                 }
-                
-                Button(action: {
-                    isShowingDateFilter = true
-                }) {
-                    Image(systemName: "calendar")
-                        .foregroundColor(selectedDate != nil ? .green : .blue)
-                        .imageScale(.large)
-                        .frame(width: 44, height: 44)
-                }
-
-                Button(action: {
-                    activityToEdit = nil
-                    isShowingCreateActivity = true
-                }) {
-                    Image(systemName: "plus")
-                        .imageScale(.large)
-                        .frame(width: 44, height: 44)
-                }
+                .listStyle(PlainListStyle())
+                .scrollContentBackground(.hidden)
+                .environment(\.defaultMinListRowHeight, 0)
             }
-        )
-        .searchable(text: $searchText, prompt: "Search activities")
-        .sheet(isPresented: $isShowingCreateActivity) {
-            CreateEditActivity(
-                viewModel: viewModel,
-                trip: trip,
-                activityToEdit: activityToEdit
-            )
-        }
-        .onChange(of: activityToEdit) { _, newValue in
-            if newValue != nil {
-                isShowingCreateActivity = true
-            }
-        }
-        .sheet(isPresented: $isShowingDateFilter) {
-            dateFilterSheet
-        }
-        .alert(isPresented: $isShowingDeleteConfirmation) {
-            Alert(
-                title: Text("Delete Activity"),
-                message: Text("Are you sure you want to delete \"\(activityToDelete?.name ?? "")\"?"),
-                primaryButton: .destructive(Text("Delete")) {
-                    if let activity = activityToDelete {
-                        viewModel.deleteActivity(from: trip, activity: activity)
+            .navigationTitle("Activities")
+            .navigationBarItems(
+                trailing: HStack {
+                    NavigationLink(destination: ActivityMapOverviewView(trip: trip)) {
+                        Image(systemName: "map")
+                            .imageScale(.large)
+                            .frame(width: 44, height: 44)
                     }
-                },
-                secondaryButton: .cancel()
+
+                    Button(action: {
+                        isShowingDateFilter = true
+                    }) {
+                        Image(systemName: "calendar")
+                            .foregroundColor(selectedDate != nil ? .green : .blue)
+                            .imageScale(.large)
+                            .frame(width: 44, height: 44)
+                    }
+
+                    Button(action: {
+                        activityToEdit = nil
+                        isShowingCreateActivity = true
+                    }) {
+                        Image(systemName: "plus")
+                            .imageScale(.large)
+                            .frame(width: 44, height: 44)
+                    }
+                }
             )
-        }
+            .searchable(text: $searchText, prompt: "Search activities")
+            .sheet(isPresented: $isShowingCreateActivity) {
+                CreateEditActivity(
+                    viewModel: viewModel,
+                    trip: trip,
+                    activityToEdit: activityToEdit
+                )
+            }
+            .onChange(of: activityToEdit) { _, newValue in
+                if newValue != nil {
+                    isShowingCreateActivity = true
+                }
+            }
+            .sheet(isPresented: $isShowingDateFilter) {
+                dateFilterSheet
+            }
+            .alert(isPresented: $isShowingDeleteConfirmation) {
+                Alert(
+                    title: Text("Delete Activity"),
+                    message: Text("Are you sure you want to delete \"\(activityToDelete?.name ?? "")\"?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        if let activity = activityToDelete {
+                            viewModel.deleteActivity(from: trip, activity: activity)
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .navigationDestination(item: $selectedActivity) { activity in
+                ActivityMapDetailView(activity: activity)
+            }
     }
 
     // MARK: - Filter Logic
@@ -159,7 +170,7 @@ struct ActivityListView: View {
 
     @ViewBuilder
     private func activityCell(for activity: Activity) -> some View {
-        ActivityCellView(activity: activity)
+        ActivityCellView(activity: activity, selectedActivity: $selectedActivity)
             .listRowInsets(EdgeInsets())
             .frame(maxWidth: .infinity)
             .padding(.horizontal)
@@ -210,7 +221,7 @@ struct ActivityListView: View {
 
     @ViewBuilder
     private var dateFilterSheet: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 DatePicker(
                     "Select Date",

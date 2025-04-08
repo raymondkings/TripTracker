@@ -14,5 +14,12 @@
     <string>$(GEMINI_API_KEY)</string>
     <key>UNSPLASH_ACCESS_KEY</key>
     <string>$(UNSPLASH_ACCESS_KEY)</string>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
 </dict>
 </plist>

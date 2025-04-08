@@ -37,6 +37,7 @@ playground.xcworkspace
 Packages/
 Package.pins
 Package.resolved
+!trip-tracker.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 .swiftpm
 .build/

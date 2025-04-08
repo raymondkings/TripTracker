@@ -20,6 +20,8 @@ import os
 
     init() {
         if fileExistsAtSavePath() {
+            // To load mock data, such that it is not overwritten by the real datas
+            // try? FileManager.default.removeItem(at: savePath)
             loadTrips()
         } else {
             logger.debug("No saved file found, adding mock data.")
@@ -33,8 +35,8 @@ import os
     }
 
     private func loadMockData() {
-        let mockActivity1 = ActivityViewModel().mockActivity1
-        let mockActivity2 = ActivityViewModel().mockActivity2
+        let mockActivities1 = ActivityViewModel().mockActivities1
+        let mockActivities2 = ActivityViewModel().mockActivities2
         let mockTrip = Trip(
             id: UUID(),
             name: "Summer Vacation in Italy",
@@ -44,9 +46,21 @@ import os
             imageUrl: nil,
             mock: true,
             aiGenerated: false,
-            activities: [mockActivity1, mockActivity2]
+            activities: mockActivities1
+        )
+        let mockTrip2 = Trip(
+            id: UUID(),
+            name: "Adventure and Foodie Trip to Jakarta",
+            startDate: Date(),
+            endDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date(),
+            country: "Indonesia",
+            imageUrl: nil,
+            mock: true,
+            aiGenerated: true,
+            activities: mockActivities2
         )
         // trips.append(mockTrip)
+        // trips.append(mockTrip2)
         logger.info("Mock trip \(mockTrip.name) added.")
     }
 

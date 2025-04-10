@@ -251,7 +251,8 @@ struct GenerateTripWithAI: View {
            - dinner → activity (optional)
         5. One accommodation per day (type = accommodation), ideally placed at the end of the day.
         6. Ensure that activities are realistic, related to the cities given, and include interesting cultural, historical, or fun local experiences.
-        7. Ensure all fields match exactly and enums are in lowercase string format. Output **ONLY valid JSON** — no markdown, no extra text, and no code blocks.
+        7. The location name should match the name of the place, the exact address is not needed. Append the city name behind the location name. 
+        8. Ensure all fields match exactly and enums are in lowercase string format. Output **ONLY valid JSON** — no markdown, no extra text, and no code blocks.
 
         ---
 

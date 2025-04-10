@@ -266,8 +266,6 @@ struct GenerateTripWithAI: View {
         
         - Give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. 
         
-        - One full day should have 3 meals : breakfast, lunch, and dinner. Since the first day is arrival day and the last day is departure day, the first day should only have dinner, and the last day should only have breakfast. 
-        
         - Consider the Date and Time. The activities that you return will be sorted by the Time and the Date, so for example, having Breakfast after Dinner in the same day does not make sense. The Meal order has to be correct! Breakfast first, then Lunch, then Dinner.  
         
         Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.

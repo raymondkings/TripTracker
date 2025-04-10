@@ -142,6 +142,9 @@ struct GenerateTripWithAI: View {
                 }
             }
             .navigationTitle("Generate Trip with AI ✨")
+            .toast(isPresenting: $showErrorToastAITrip, duration: 2.0) {
+                AlertToast(type: .error(Color.red), title: "Failed to generate trip, please try again later")
+            }
         }
         .interactiveDismissDisabled(isSubmitting)
     }

@@ -241,7 +241,6 @@ struct GenerateTripWithAI: View {
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
         
         ### HARD RULES — DO NOT VIOLATE:
-
         1. Return an itinerary for **EVERY DAY** between `startDate` and `endDate`, inclusive.
         2. Each day **must contain exactly 3 meals**: breakfast, lunch, and dinner — always in this order.
         3. You can add **0 to 3 activities per day** — placed **before lunch, between meals, or after dinner**. Do not place any activities before breakfast.

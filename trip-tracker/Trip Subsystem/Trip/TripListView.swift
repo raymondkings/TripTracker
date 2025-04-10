@@ -14,9 +14,10 @@ struct TripListView: View {
     @State private var isShowingGenerateTripWithAI = false
     @State private var isShowingFileImporter = false
     @State private var imageViewModel = ImageViewModel()
-    @State private var showSuccessToast = false
     @State private var importErrorMessage: String?
+    @State private var showSuccessToast = false
     @State private var showErrorToast = false
+    @State private var showErrorToastAITrip = false
 
     /// Limit the usage for generating trip with AI
     @State private var dailyGenerationCount = 0
@@ -41,7 +42,10 @@ struct TripListView: View {
             .sheet(isPresented: $isShowingGenerateTripWithAI, content: {
                 GenerateTripWithAI(
                     tripViewModel : viewModel,
-                    isShowingGenerateTripWithAI: $isShowingGenerateTripWithAI
+                    isShowingGenerateTripWithAI: $isShowingGenerateTripWithAI,
+                    showSuccessToast: $showSuccessToast,
+                    showErrorToastAITrip: $showErrorToastAITrip,
+                    dailyGenerationCount: $dailyGenerationCount
                 )
             })
             .fileImporter(
@@ -56,6 +60,9 @@ struct TripListView: View {
             }
             .toast(isPresenting: $showErrorToast, duration: 2.0) {
                 AlertToast(type: .error(Color.red), title: importErrorMessage ?? "Failed to import trip")
+            }
+            .toast(isPresenting: $showErrorToastAITrip, duration: 2.0) {
+                AlertToast(type: .error(Color.red), title: "Failed to generate trip, please try again later")
             }
         }
         .onAppear {
@@ -95,7 +102,6 @@ struct TripListView: View {
 
                 Button("Generate Trip with AI ✨") {
                     isShowingGenerateTripWithAI = true
-                    incrementGenerationCount()
                 }
                 .disabled(dailyGenerationCount >= dailyLimit)
 

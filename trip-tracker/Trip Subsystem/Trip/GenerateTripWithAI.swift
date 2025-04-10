@@ -28,12 +28,11 @@ struct GenerateTripWithAI: View {
     @State private var selectedImage: UIImage?
     @State private var isShowingImagePicker = false
     
-    @State private var showSuccessToast = false
-    @State private var showErrorToast = false
+    @Binding var showSuccessToast: Bool
+    @Binding var showErrorToastAITrip: Bool
 
     /// Limit the usage for generating trip with AI
-    @State private var dailyGenerationCount = 0
-    private let dailyLimit = 3
+    @Binding var dailyGenerationCount: Int
 
 
     var body: some View {
@@ -143,31 +142,8 @@ struct GenerateTripWithAI: View {
                 }
             }
             .navigationTitle("Generate Trip with AI ✨")
-            .toast(isPresenting: $showSuccessToast, duration: 2.0) {
-                AlertToast(type: .complete(Color.green), title: "Trip Saved!")
-            }
-            .toast(isPresenting: $showErrorToast, duration: 2.0) {
-                AlertToast(type: .error(Color.red), title: "Failed to generate trip")
-            }
         }
-        .onAppear {
-            loadGenerationLimit()
-        }
-    }
-    
-    private func loadGenerationLimit() {
-        let defaults = UserDefaults.standard
-        let today = Calendar.current.startOfDay(for: Date())
-
-        if let savedDate = defaults.object(forKey: "lastGenerationDate") as? Date,
-           Calendar.current.isDate(savedDate, inSameDayAs: today) {
-            dailyGenerationCount = defaults.integer(forKey: "generationCount")
-        } else {
-            // New day
-            defaults.set(today, forKey: "lastGenerationDate")
-            defaults.set(0, forKey: "generationCount")
-            dailyGenerationCount = 0
-        }
+        .interactiveDismissDisabled(isSubmitting)
     }
     
     private func incrementGenerationCount() {
@@ -232,8 +208,9 @@ struct GenerateTripWithAI: View {
         let apiKey = ConfigTemplate.geminiAPIKey
 
         guard let url = URL(string: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=\(apiKey)") else {
-            generatedJSON = "{ \"error\": \"Invalid URL.\" }"
             isSubmitting = false
+            generatedJSON = "{ \"error\": \"Invalid URL.\" }"
+            showErrorToastAITrip = true
             return
         }
 
@@ -259,16 +236,31 @@ struct GenerateTripWithAI: View {
         - location: String
         - type: Enum (activity, accommodation, restaurant)
         - mealType: Enum (optional, one of breakfast, lunch, dinner, multiple)
+        
+        ### HARD RULES — DO NOT VIOLATE:
 
-        Consider all the following points : 
+        1. Return an itinerary for **EVERY DAY** between `startDate` and `endDate`, inclusive.
+        2. Each day **must contain exactly 3 meals**: breakfast, lunch, and dinner — always in this order.
+        3. You can add **0 to 3 activities per day** — placed **before lunch, between meals, or after dinner**. Do not place any activities before breakfast.
+        4. The mealType order must always be:
+           - breakfast → activity (optional)
+           - lunch → activity (optional)
+           - dinner → activity (optional)
+        5. One accommodation per day (type = accommodation), ideally placed at the end of the day.
+        6. Ensure that activities are realistic, related to the cities given, and include interesting cultural, historical, or fun local experiences.
+        7. Ensure all fields match exactly and enums are in lowercase string format. Output **ONLY valid JSON** — no markdown, no extra text, and no code blocks.
+
+        ---
+
+        ### Example Day Order (suggested pattern):
+
+        - breakfast (restaurant)
+        - activity (e.g., museum)
+        - lunch (restaurant)
+        - activity (e.g., walking tour)
+        - dinner (restaurant)
+        - accommodation
         
-        - The location name should match the name of the place, the exact address is not needed. Append the city name behind the location name. 
-        
-        - Give the name of the hotel as accomodations. You do not need to consider the modes of transportation, so you also do not need to consider arrival and departure. 
-        
-        - Consider the Date and Time. The activities that you return will be sorted by the Time and the Date, so for example, having Breakfast after Dinner in the same day does not make sense. The Meal order has to be correct! Breakfast first, then Lunch, then Dinner.  
-        
-        Ensure all fields match exactly and enums are in lowercase string format. Output ONLY valid JSON — no Markdown or code blocks.
         Input: \(request)
         """
 
@@ -289,64 +281,64 @@ struct GenerateTripWithAI: View {
         do {
             urlRequest.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
         } catch {
-            generatedJSON = "{ \"error\": \"Failed to encode request body.\" }"
             isSubmitting = false
+            generatedJSON = "{ \"error\": \"Failed to encode request body.\" }"
+            showErrorToastAITrip = true
             return
         }
+
         URLSession.shared.dataTask(with: urlRequest) { data, _, error in
             DispatchQueue.main.async {
-                if let data = data {
-                    print("Raw Gemini response:\n", String(data: data, encoding: .utf8) ?? "N/A")
-
-                    if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                       let candidates = json["candidates"] as? [[String: Any]],
-                       let content = candidates.first?["content"] as? [String: Any],
-                       let parts = content["parts"] as? [[String: Any]],
-                       let text = parts.first?["text"] as? String {
-                        print("Gemini parsed text:\n\(text)")
-                        let cleanText = text
-                            .replacingOccurrences(of: "```json", with: "")
-                            .replacingOccurrences(of: "```", with: "")
-                            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-                        if let jsonData = cleanText.data(using: .utf8) {
-                            do {
-                                let decoder = JSONDecoder()
-                                decoder.dateDecodingStrategy = .iso8601
-                                var decodedTrip = try decoder.decode(Trip.self, from: jsonData)
-                                decodedTrip.id = UUID()
-                                decodedTrip.aiGenerated = true
-                                decodedTrip.mock = true
-                                let localImageFilename = selectedImage.flatMap { saveImageLocally($0) }
-                                
-                                decodedTrip.localImageFilename = localImageFilename
-                                self.tripViewModel.addAIGeneratedTrip(decodedTrip)
-                                isShowingGenerateTripWithAI = false
-                                self.showSuccessToast = true
-                                incrementGenerationCount()
-                            } catch {
-                                print("Decoding error:", error)
-                                isShowingGenerateTripWithAI = false
-                                self.showErrorToast = true
-                                self.generatedJSON = "{ \"error\": \"Failed to decode AI trip: \(error.localizedDescription)\" }"
-                            }
-                        } else {
-                            isShowingGenerateTripWithAI = false
-                            self.showErrorToast = true
-                            self.generatedJSON = "{ \"error\": \"Failed to convert Gemini response to data.\" }"
-                        }
-                    } else if let jsonError = try? JSONSerialization.jsonObject(with: data, options: []) {
-                        print("Unexpected JSON structure:\n\(jsonError)")
-                        isShowingGenerateTripWithAI = false
-                        self.showErrorToast = true
-                        self.generatedJSON = "{ \"error\": \"Unexpected Gemini response format.\" }"
-                    } else {
-                        isShowingGenerateTripWithAI = false
-                        self.showErrorToast = true
-                        self.generatedJSON = "{ \"error\": \"Failed to decode Gemini response.\" }"
-                    }
+                defer {
+                    isSubmitting = false
                 }
-                self.isSubmitting = false
+
+                guard let data = data else {
+                    generatedJSON = "{ \"error\": \"No response data from Gemini.\" }"
+                    showErrorToastAITrip = true
+                    return
+                }
+
+                if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let candidates = json["candidates"] as? [[String: Any]],
+                   let content = candidates.first?["content"] as? [String: Any],
+                   let parts = content["parts"] as? [[String: Any]],
+                   let text = parts.first?["text"] as? String {
+                    let cleanText = text
+                        .replacingOccurrences(of: "```json", with: "")
+                        .replacingOccurrences(of: "```", with: "")
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+
+                    guard let jsonData = cleanText.data(using: .utf8) else {
+                        generatedJSON = "{ \"error\": \"Failed to convert Gemini response to data.\" }"
+                        showErrorToastAITrip = true
+                        return
+                    }
+
+                    do {
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .iso8601
+                        var decodedTrip = try decoder.decode(Trip.self, from: jsonData)
+                        decodedTrip.id = UUID()
+                        decodedTrip.aiGenerated = true
+                        decodedTrip.mock = true
+
+                        let localImageFilename = selectedImage.flatMap { saveImageLocally($0) }
+                        decodedTrip.localImageFilename = localImageFilename
+
+                        tripViewModel.addAIGeneratedTrip(decodedTrip)
+                        incrementGenerationCount()
+                        showSuccessToast = true
+                        isShowingGenerateTripWithAI = false
+                    } catch {
+                        print("Decoding error:", error)
+                        generatedJSON = "{ \"error\": \"Failed to decode AI trip: \(error.localizedDescription)\" }"
+                        showErrorToastAITrip = true
+                    }
+                } else {
+                    generatedJSON = "{ \"error\": \"Unexpected Gemini response format.\" }"
+                    showErrorToastAITrip = true
+                }
             }
         }
         .resume()
